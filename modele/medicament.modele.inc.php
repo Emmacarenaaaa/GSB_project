@@ -23,7 +23,14 @@ include_once 'bd.inc.php';
 
         try{
             $monPdo = connexionPDO();
-            $req = 'SELECT m.MED_DEPOTLEGAL as \'depotlegal\', m.MED_NOMCOMMERCIAL as \'nomcom\', m.MED_COMPOSITION as \'compo\', m.MED_EFFETS as \'effet\', m.MED_CONTREINDIC as \'contreindic\', m.MED_PRIXECHANTILLON as \'prixechan\', f.FAM_LIBELLE as \'famille\' FROM medicament m INNER JOIN famille f ON f.FAM_CODE = m.FAM_CODE WHERE MED_DEPOTLEGAL = "'.$depot.'"';
+            $req = 'SELECT m.MED_DEPOTLEGAL as \'depotlegal\',
+             m.MED_NOMCOMMERCIAL as \'nomcom\', m.MED_COMPOSITION as \'compo\', 
+             m.MED_EFFETS as \'effet\', m.MED_CONTREINDIC as \'contreindic\', 
+             m.MED_PRIXECHANTILLON as \'prixechan\', 
+             f.FAM_LIBELLE as \'famille\' 
+             FROM medicament m 
+             INNER JOIN famille f ON f.FAM_CODE = m.FAM_CODE
+              WHERE MED_DEPOTLEGAL = "'.$depot.'"';
             $res = $monPdo->query($req);
             $result = $res->fetch();    
             return $result;
