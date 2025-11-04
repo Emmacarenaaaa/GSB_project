@@ -55,7 +55,7 @@ function getAllInformationRapportDeVisiteNum($rapNum){
   pr.PRA_PRENOM AS prenomremplacant,
   md1.MED_DEPOTLEGAL AS medocpresenter1,
   md2.MED_DEPOTLEGAL AS medocpresenter2,
-  e.ETAT_LIBELLE AS etatrapport, 
+  e.ETAT_LIBELLE AS etatrapport 
 FROM rapport_visite r
 LEFT JOIN collaborateur c ON r.COL_MATRICULE = c.COL_MATRICULE
 LEFT JOIN etat e ON r.ET_CODE = e.ETAT_CODE

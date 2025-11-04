@@ -36,8 +36,8 @@ switch ($action) {
 case 'saisirrapport': {
     // Pour afficher le formulaire de saisie
     $motifs = getMotifs();
-    $praticiens = getAllPraticiens(); // Exemple, à adapter à ta fonction
-    $medicaments = getAllMedicaments(); // Exemple, à adapter à ta fonction
+    $praticiens = getAllPraticiens();
+    $medicaments = getMedicaments(); 
     include("vues/v_saisirRapportDeVisite.php");
     break;
 }
