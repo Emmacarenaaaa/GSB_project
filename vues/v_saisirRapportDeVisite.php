@@ -1,4 +1,4 @@
-<?php
+
 
 <form action="index.php?uc=rapportvisite&action=enregistrerrapport" method="post" class="form-group">
  <label for="praticien">Praticien :</label>
@@ -68,4 +68,3 @@ function toggleMotifAutre(select) {
  container.style.display = (select.value == '4') ? '' : 'none';
 }
 </script>
-?>

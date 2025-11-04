@@ -92,7 +92,7 @@ function getMotifs() {
     }
 }
 
-function getAllPraticien() {
+function getAllPraticiens() {
     try {
         $monPdo = connexionPDO();
         $req = 'SELECT PRA_NUM, PRA_NOM, PRA_PRENOM FROM praticien ORDER BY PRA_NOM';
@@ -104,7 +104,7 @@ function getAllPraticien() {
     }
 }
 
-function getMedicament() {
+function getMedicaments() {
     try {
         $monPdo = connexionPDO();
         $req = 'SELECT MED_DEPOTLEGAL, MED_NOMCOMMERCIAL FROM medicament ORDER BY MED_NOMCOMMERCIAL';
