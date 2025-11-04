@@ -57,7 +57,7 @@ case 'enregistrerrapport': {
     $medoc1 = !empty($_POST['medoc1']) ? $_POST['medoc1'] : null;
     $medoc2 = !empty($_POST['medoc2']) ? $_POST['medoc2'] : null;
     $numpratremp = !empty($_POST['numRemplacant']) ? $_POST['numRemplacant'] : null;
-    $etat = !empty($_POST['etat']) ? $_POST['etat'] : 1; 
+    $etat = !empty($_POST['etat']) ? $_POST['etat'] : 0; 
     $matriculeVisiteur = $_SESSION['matricule'];
 
     if (addRapportDeVisite($numPraticien, $matriculeVisiteur, $dateVisite, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $etat, $numpratremp)) {
@@ -69,9 +69,5 @@ case 'enregistrerrapport': {
         header('Location: index.php?uc=rapportvisite&action=saisirrapport');
         exit;
     }
-}
- default: {
-        header('Location: index.php?uc=rapportvisite&action=voirrapport');
-        exit;
-}
+}}
 ?>

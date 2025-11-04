@@ -92,7 +92,7 @@ function getMotifs() {
     }
 }
 
-function getPraticien() {
+function getAllPraticien() {
     try {
         $monPdo = connexionPDO();
         $req = 'SELECT PRA_NUM, PRA_NOM, PRA_PRENOM FROM praticien ORDER BY PRA_NOM';
@@ -116,6 +116,29 @@ function getMedicament() {
     }
 }
 
+function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $bilan, $dateSaisie, $medoc1, $medoc2, $numRemplacant) {
+    try {
+        $monPdo = connexionPDO();
+        $req = "INSERT INTO rapport_visite
+            (COL_MATRICULE, PRA_NUM, RAP_DATEVISITE, MO_CODE, RAP_BILAN, RAP_DATESAISIE, MED_DEPOTLEGAL_PRESENTER1, MED_DEPOTLEGAL_PRESENTER2, PRA_NUM_REMPLACANT)
+            VALUES (:matricule, :numPraticien, :dateVisite, :motif, :bilan, :dateSaisie, :medoc1, :medoc2, :numRemplacant)";
+        $stmt = $monPdo->prepare($req);
+        $stmt->bindParam(':matricule', $matricule, PDO::PARAM_INT);
+        $stmt->bindParam(':numPraticien', $numPraticien, PDO::PARAM_INT);
+        $stmt->bindParam(':dateVisite', $dateVisite);
+        $stmt->bindParam(':motif', $motif, PDO::PARAM_INT);
+        $stmt->bindParam(':bilan', $bilan);
+        $stmt->bindParam(':dateSaisie', $dateSaisie);
+        $stmt->bindParam(':medoc1', $medoc1);
+        $stmt->bindParam(':medoc2', $medoc2);
+        $stmt->bindParam(':numRemplacant', $numRemplacant, PDO::PARAM_INT);
+        $stmt->execute();
+        return true;
+    } catch (PDOException $e) {
+        print "Erreur !: " . $e->getMessage();
+        return false;
+    }
+}
 
 
 
