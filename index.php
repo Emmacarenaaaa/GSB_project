@@ -43,7 +43,7 @@
         }
         case 'rapportvisite' : 
         {   
-            if(!empty($_SESSION['login'])){
+            if(!isset($_SESSION['user_type']) || $_SESSION['user_type'] ==='Responsable Secteur'){
                 include("controleur/c_rapportVisite.php");
             }else{
                 include("vues/v_accesInterdit.php");

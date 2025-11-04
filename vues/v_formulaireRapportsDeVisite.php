@@ -29,8 +29,16 @@
             ?>
           </select>
           <input class="btn btn-info text-light valider" type="submit" value="Afficher les informations">
+
+
         </form>
+
       </div>
+<div class="test col-12 col-sm-8 col-lg-6 col-xl-5 col-xxl-4 py-lg-5">
+  <input class="btn btn-info text-light valider" type="button" value="Remplir un rapport" onclick="window.location.href='index.php?uc=rapportvisite&action=saisirrapport'"></div>
     </div>
+
+
   </div>
+
 </section>
