@@ -92,10 +92,10 @@ function getMotifs() {
     }
 }
 
-function getCollaborateurs() {
+function getPraticien() {
     try {
         $monPdo = connexionPDO();
-        $req = 'SELECT COL_MATRICULE, COL_NOM, COL_PRENOM FROM collaborateur ORDER BY COL_NOM';
+        $req = 'SELECT PRA_NUM, PRA_NOM, PRA_PRENOM FROM praticien ORDER BY PRA_NOM';
         $result = $monPdo->query($req)->fetchAll(PDO::FETCH_ASSOC);
         return $result;
     } catch (PDOException $e) {
@@ -103,6 +103,20 @@ function getCollaborateurs() {
         die();
     }
 }
+
+function getMedicament() {
+    try {
+        $monPdo = connexionPDO();
+        $req = 'SELECT MED_DEPOTLEGAL, MED_NOMCOMMERCIAL FROM medicament ORDER BY MED_NOMCOMMERCIAL';
+        $result = $monPdo->query($req)->fetchAll(PDO::FETCH_ASSOC);
+        return $result;
+    } catch (PDOException $e) {
+        print "Erreur : " . $e->getMessage();
+        die();
+    }
+}
+
+
 
 
 
