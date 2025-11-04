@@ -122,26 +122,62 @@ function getMedicaments() {
     }
 }
 
-function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $bilan, $dateSaisie, $medoc1, $medoc2, $numRemplacant) {
+function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numRemplacant, $etat) {
     try {
         $monPdo = connexionPDO();
-        $req = "INSERT INTO rapport_visite
-            (COL_MATRICULE, PRA_NUM, RAP_DATEVISITE, MO_CODE, RAP_BILAN, RAP_DATESAISIE, MED_DEPOTLEGAL_PRESENTER1, MED_DEPOTLEGAL_PRESENTER2, PRA_NUM_REMPLACANT)
-            VALUES (:matricule, :numPraticien, :dateVisite, :motif, :bilan, :dateSaisie, :medoc1, :medoc2, :numRemplacant)";
+        $monPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $req = "INSERT INTO rapport_visite (
+            COL_MATRICULE, PRA_NUM, RAP_DATEVISITE, MO_CODE, RAP_MOTIF_AUTRE,
+            RAP_BILAN, RAP_DATESAISIE,
+            MED_DEPOTLEGAL_PRESENTER1, MED_DEPOTLEGAL_PRESENTER2, PRA_NUM_REMPLACANT, ET_CODE
+        ) VALUES (
+            :col_matricule, :pra_num, :rap_datevisite, :mo_code, :rap_motif_autre,
+            :rap_bilan, NOW(),
+            :medoc1, :medoc2, :numRemplacant, :et_code
+        )";
+
         $stmt = $monPdo->prepare($req);
-        $stmt->bindParam(':matricule', $matricule, PDO::PARAM_INT);
-        $stmt->bindParam(':numPraticien', $numPraticien, PDO::PARAM_INT);
-        $stmt->bindParam(':dateVisite', $dateVisite);
-        $stmt->bindParam(':motif', $motif, PDO::PARAM_INT);
-        $stmt->bindParam(':bilan', $bilan);
-        $stmt->bindParam(':dateSaisie', $dateSaisie);
-        $stmt->bindParam(':medoc1', $medoc1);
-        $stmt->bindParam(':medoc2', $medoc2);
-        $stmt->bindParam(':numRemplacant', $numRemplacant, PDO::PARAM_INT);
+
+        $stmt->bindParam(':col_matricule', $matricule, PDO::PARAM_INT);
+        $stmt->bindParam(':pra_num', $numPraticien, PDO::PARAM_INT);
+        $stmt->bindParam(':rap_datevisite', $dateVisite);
+        $stmt->bindParam(':mo_code', $motif, PDO::PARAM_INT);
+
+        if ($motifAutre === null) {
+            $stmt->bindValue(':rap_motif_autre', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindParam(':rap_motif_autre', $motifAutre, PDO::PARAM_STR);
+        }
+
+        $stmt->bindParam(':rap_bilan', $bilan);
+
+        if (empty($medoc1)) {
+            $stmt->bindValue(':medoc1', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindParam(':medoc1', $medoc1);
+        }
+
+        if (empty($medoc2)) {
+            $stmt->bindValue(':medoc2', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindParam(':medoc2', $medoc2);
+        }
+
+        if (empty($numRemplacant)) {
+            $stmt->bindValue(':numRemplacant', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindParam(':numRemplacant', $numRemplacant, PDO::PARAM_INT);
+        }
+
+        $stmt->bindParam(':et_code', $etat, PDO::PARAM_INT);
+
         $stmt->execute();
         return true;
+
     } catch (PDOException $e) {
-        print "Erreur !: " . $e->getMessage();
+        // Pour debug, tu peux logger ou afficher :
+        error_log("Erreur SQL : " . $e->getMessage());
         return false;
     }
 }

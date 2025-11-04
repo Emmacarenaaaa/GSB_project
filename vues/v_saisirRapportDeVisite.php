@@ -1,6 +1,6 @@
-
-
-<form action="index.php?uc=rapportvisite&action=enregistrerrapport" method="post" class="form-group">
+<div class="row align-items-center justify-content-center">
+ <div class="test col-12 col-sm-8 col-lg-6 col-xl-5 col-xxl-4 py-lg-5 py-3">
+<form action="index.php?uc=rapportvisite&action=enregistrerrapport" method="post" class="formulaire-recherche col-12 m-0">
  <label for="praticien">Praticien :</label>
  <select name="praticien" required class="form-select">
   <option value="">-- Sélectionner --</option>
@@ -68,3 +68,5 @@ function toggleMotifAutre(select) {
  container.style.display = (select.value == '4') ? '' : 'none';
 }
 </script>
+</div>
+</div>
