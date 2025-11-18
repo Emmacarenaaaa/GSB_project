@@ -28,7 +28,13 @@
                     </select>
                     <input class="btn btn-info text-light valider" type="submit" value="Afficher les informations">
                 </form>
-            </div>
+                
+                        </div>
+                        <a href="index.php?uc=praticien&action=modif" class="btn btn-warning mt-3" style="margin-left:15px;">
+                            Gérer praticiens
+                        </a>
+
         </div>
     </div>
 </section>
+
