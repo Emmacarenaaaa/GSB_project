@@ -127,63 +127,70 @@ function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAut
         $monPdo = connexionPDO();
         $monPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+ // Récupérer la valeur exacte depuis collaborateur
+        $getMatricule = $monPdo->prepare("SELECT COL_MATRICULE FROM collaborateur WHERE COL_MATRICULE = ?");
+        $getMatricule->execute([$matricule]);
+        $matriculeExact = $getMatricule->fetchColumn();
+        
+        if (!$matriculeExact) {
+            throw new Exception("Matricule inexistant");
+        }
+        
+        error_log("Matricule utilisé : '$matriculeExact'");
+
+        // Calculer le prochain RAP_NUM
+        $reqNum = "SELECT IFNULL(MAX(RAP_NUM), 0) + 1 AS prochain_num 
+                   FROM rapport_visite 
+                   WHERE COL_MATRICULE = ?";
+        $stmtNum = $monPdo->prepare($reqNum);
+        $stmtNum->execute([$matriculeExact]);
+        $rapNum = $stmtNum->fetchColumn();
+        if (!$rapNum) $rapNum = 1;
+        
+        error_log("RAP_NUM calculé : $rapNum");
+
+        // INSERT
         $req = "INSERT INTO rapport_visite (
-            COL_MATRICULE, PRA_NUM, RAP_DATEVISITE, MO_CODE, RAP_MOTIF_AUTRE,
+            COL_MATRICULE, RAP_NUM, PRA_NUM, RAP_DATEVISITE, MO_Code, RAP_MOTIF_AUTRE,
             RAP_BILAN, RAP_DATESAISIE,
             MED_DEPOTLEGAL_PRESENTER1, MED_DEPOTLEGAL_PRESENTER2, PRA_NUM_REMPLACANT, ET_CODE
         ) VALUES (
-            :col_matricule, :pra_num, :rap_datevisite, :mo_code, :rap_motif_autre,
+            :col_matricule, :rap_num, :pra_num, :rap_datevisite, :mo_code, :rap_motif_autre,
             :rap_bilan, NOW(),
             :medoc1, :medoc2, :numRemplacant, :et_code
         )";
 
         $stmt = $monPdo->prepare($req);
 
-        $stmt->bindParam(':col_matricule', $matricule, PDO::PARAM_INT);
+        // BIND tous les paramètres
+        $stmt->bindParam(':col_matricule', $matriculeExact, PDO::PARAM_STR);
+        $stmt->bindParam(':rap_num', $rapNum, PDO::PARAM_INT);
         $stmt->bindParam(':pra_num', $numPraticien, PDO::PARAM_INT);
-        $stmt->bindParam(':rap_datevisite', $dateVisite);
+        $stmt->bindParam(':rap_datevisite', $dateVisite, PDO::PARAM_STR);
         $stmt->bindParam(':mo_code', $motif, PDO::PARAM_INT);
-
-        if ($motifAutre === null) {
-            $stmt->bindValue(':rap_motif_autre', null, PDO::PARAM_NULL);
-        } else {
-            $stmt->bindParam(':rap_motif_autre', $motifAutre, PDO::PARAM_STR);
-        }
-
-        $stmt->bindParam(':rap_bilan', $bilan);
-
-        if (empty($medoc1)) {
-            $stmt->bindValue(':medoc1', null, PDO::PARAM_NULL);
-        } else {
-            $stmt->bindParam(':medoc1', $medoc1);
-        }
-
-        if (empty($medoc2)) {
-            $stmt->bindValue(':medoc2', null, PDO::PARAM_NULL);
-        } else {
-            $stmt->bindParam(':medoc2', $medoc2);
-        }
-
-        if (empty($numRemplacant)) {
-            $stmt->bindValue(':numRemplacant', null, PDO::PARAM_NULL);
-        } else {
-            $stmt->bindParam(':numRemplacant', $numRemplacant, PDO::PARAM_INT);
-        }
-
+        $stmt->bindParam(':rap_motif_autre', $motifAutre, PDO::PARAM_STR);
+        $stmt->bindParam(':rap_bilan', $bilan, PDO::PARAM_STR);
+        $stmt->bindParam(':medoc1', $medoc1, PDO::PARAM_STR);
+        $stmt->bindParam(':medoc2', $medoc2, PDO::PARAM_STR);
+        $stmt->bindParam(':numRemplacant', $numRemplacant, PDO::PARAM_INT);
         $stmt->bindParam(':et_code', $etat, PDO::PARAM_INT);
 
+        // EXÉCUTER la requête INSERT
         $stmt->execute();
+        
+        error_log("Nombre de lignes insérées : " . $stmt->rowCount());
+        error_log("✓✓✓ Rapport inséré avec succès !");
+        
         return true;
 
     } catch (PDOException $e) {
-        // Pour debug, tu peux logger ou afficher :
-        error_log("Erreur SQL : " . $e->getMessage());
+        error_log("✗ Erreur SQL : " . $e->getMessage());
+        return false;
+        
+    } catch (Exception $e) {
+        error_log("✗ Erreur : " . $e->getMessage());
         return false;
     }
 }
-
-
-
-
 
 ?>
