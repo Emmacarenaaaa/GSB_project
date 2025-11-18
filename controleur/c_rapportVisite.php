@@ -137,5 +137,18 @@ case 'enregistrerrapport': {
         exit;
     }
 }
+
+$action = isset($_GET['action']) ? $_GET['action'] : 'default';
+switch ($action) {
+    case 'gerer':
+        include('v_gererPraticien.php');
+        break;
+    // autres actions (afficherprat, etc.)
+    default:
+        include('v_formulairePraticien.php');
+        break;
+}
+
+
 }
 ?>
