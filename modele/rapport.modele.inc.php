@@ -4,27 +4,47 @@
 include_once 'bd.inc.php';
 
 
-function getAllrapportDeVisite(){
-
-
-  try{
+function getAllrapportDeVisite($dateDebut = null, $dateFin = null, $praticienNum = null){
+  try {
     $monPdo = connexionPDO();
+    
     $req = 'SELECT r.RAP_NUM, r.RAP_DATEVISITE, c.COL_NOM, c.COL_PRENOM
-FROM rapport_visite r
-LEFT JOIN collaborateur c ON r.COL_MATRICULE = c.COL_MATRICULE ORDER BY RAP_NUM';
-    $res = $monPdo->query($req);
+            FROM rapport_visite r
+            LEFT JOIN collaborateur c ON r.COL_MATRICULE = c.COL_MATRICULE
+            WHERE 1=1';
+    
+    $params = [];
+    
+    if ($dateDebut !== null && $dateDebut !== '') {
+      $req .= ' AND r.RAP_DATEVISITE >= :dateDebut';
+      $params[':dateDebut'] = $dateDebut;
+    }
+    
+    if ($dateFin !== null && $dateFin !== '') {
+      $req .= ' AND r.RAP_DATEVISITE <= :dateFin';
+      $params[':dateFin'] = $dateFin;
+    }
+    
+    if ($praticienNum !== null && $praticienNum !== '') {
+      $req .= ' AND r.PRA_NUM = :praticien';
+      $params[':praticien'] = intval($praticienNum);
+    }
+    
+    $req .= ' ORDER BY r.RAP_NUM';
+    
+    $res = $monPdo->prepare($req);
+    $res->execute($params);
     $result = $res->fetchAll();
+    
     return $result;
-  } 
-
-
-  catch (PDOException $e){
+    
+  } catch (PDOException $e) {
     print "Erreur !: " . $e->getMessage();
     die();
   }
-
-
 }
+
+
   //,PRA_ADRESSE,PRA_CP, PRA_VILLE,PRA_COEFNOTORIETE,TYP_CODE
 
 

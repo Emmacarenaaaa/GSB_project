@@ -11,31 +11,74 @@
         <img class="img-fluid size-img-page" src="assets/img/rapport.jpg">
       </div>
       <div class="test col-12 col-sm-8 col-lg-6 col-xl-5 col-xxl-4 py-lg-5 py-3">
-        <?php if ($_SESSION['erreur']) {
+        <?php if (isset($_SESSION['erreur']) && $_SESSION['erreur']) {
           echo '<p class="alert alert-danger text-center w-100">Un problème est survenu lors de la selection du rapport de visite</p>';
           $_SESSION['erreur'] = false;
         } ?>
-        <form action="index.php?uc=rapportvisite&action=afficherrapport" method="post" class="formulaire-recherche col-12 m-0">
-          <label class="titre-formulaire" for="listerapport">Rapports disponibles :</label>
-          <select required name="rapports" class="form-select mt-3">
-            <option value class="text-center">- Choisissez un rapport -</option>
-            <?php
-           foreach ($result as $key) {
-            // Formatage de la date en jj/mm/aaaa
-            $dateVisite = date('d/m/Y', strtotime($key['RAP_DATEVISITE']));
-            $label = $key['RAP_NUM'] . ' - ' . $dateVisite . ' - ' . $key['COL_NOM'] . ' ' . $key['COL_PRENOM'];
-              echo '<option value="' . htmlspecialchars($key['RAP_NUM']) . '" class="form-control">' . htmlspecialchars($label) . '</option>';
-            }
+
+        <!-- FORMULAIRE DE FILTRES -->
+        <form id="formFiltre" action="index.php?uc=rapportvisite&action=voirrapport" method="post" class="formulaire-recherche col-12 m-0 mb-4 p-3 border rounded">
+          <h5 class="mb-3">Filtrer les rapports :</h5>
+          
+          <label for="dateDebut">Date de début (optionnel) :</label>
+          <input type="date" name="dateDebut" id="dateDebut" class="form-control mb-3" 
+                 value="<?php echo isset($_POST['dateDebut']) ? htmlspecialchars($_POST['dateDebut']) : ''; ?>">
+          
+          <label for="dateFin">Date de fin (optionnel) :</label>
+          <input type="date" name="dateFin" id="dateFin" class="form-control mb-3"
+                 value="<?php echo isset($_POST['dateFin']) ? htmlspecialchars($_POST['dateFin']) : ''; ?>">
+          
+          <label for="praticienFiltre">Praticien (optionnel) :</label>
+          <select name="praticienFiltre" id="praticienFiltre" class="form-select mb-3">
+            <option value="">-- Tous les praticiens --</option>
+            <?php 
+            $praticienSelectionne = isset($_POST['praticienFiltre']) ? $_POST['praticienFiltre'] : '';
+            foreach($praticiens as $praticien) {
+              $selected = ($praticienSelectionne == $praticien['PRA_NUM']) ? 'selected' : '';
+              echo '<option value="'.$praticien['PRA_NUM'].'" '.$selected.'>'.htmlspecialchars($praticien['PRA_NOM'].' '.$praticien['PRA_PRENOM']).'</option>';
+            } 
             ?>
           </select>
-          <input class="btn btn-info text-light valider" type="submit" value="Afficher les informations">
-
+          
+          <div class="d-flex gap-2">
+            <input class="btn btn-primary flex-grow-1" type="submit" value="Filtrer">
+            <a href="index.php?uc=rapportvisite&action=voirrapport" class="btn btn-secondary">Réinitialiser</a>
+          </div>
 
         </form>
 
+    
+
       </div>
+          <!-- FORMULAIRE D'AFFICHAGE -->
+        <form action="index.php?uc=rapportvisite&action=afficherrapport" method="post" class="formulaire-recherche col-12 m-0">
+          <label class="titre-formulaire" for="rapports">Rapports disponibles :</label>
+          
+          <?php if (empty($result)): ?>
+            <p class="alert alert-warning mt-3">Aucun rapport trouvé avec ces critères.</p>
+          <?php else: ?>
+            <select required name="rapports" id="rapports" class="form-select mt-3">
+              <option value="">- Choisissez un rapport -</option>
+              <?php
+              foreach ($result as $key) {
+                // Formatage de la date en jj/mm/aaaa
+                $dateVisite = date('d/m/Y', strtotime($key['RAP_DATEVISITE']));
+                $label = $key['RAP_NUM'] . ' - ' . $dateVisite . ' - ' . $key['COL_NOM'] . ' ' . $key['COL_PRENOM'];
+                echo '<option value="' . htmlspecialchars($key['RAP_NUM']) . '">' . htmlspecialchars($label) . '</option>';
+              }
+              ?>
+            </select>
+            <small class="text-muted"><?php echo count($result); ?> rapport(s) trouvé(s)</small>
+            <input class="btn btn-info text-light valider mt-3" type="submit" value="Afficher les informations">
+          <?php endif; ?>
+        </form>
+        <div>
+        </div>
+      <?php if (!isset($_SESSION['hab_id']) || $_SESSION['hab_id'] != 3): ?>
 <div class="test col-12 col-sm-8 col-lg-6 col-xl-5 col-xxl-4 py-lg-5">
-  <input class="btn btn-info text-light valider" type="button" value="Remplir un rapport" onclick="window.location.href='index.php?uc=rapportvisite&action=saisirrapport'"></div>
+  <input class="btn btn-info text-light valider" type="button" value="Remplir un rapport" onclick="window.location.href='index.php?uc=rapportvisite&action=saisirrapport'">
+  </div>
+<?php endif; ?>
     </div>
 
 

@@ -28,6 +28,7 @@ switch ($action) {
 				header('location: index.php?uc=connexion&action=connexion');
 			} else {
 				$info = getAllInformationCompte($_SESSION['matricule']);
+				$_SESSION['hab_id'] = $info['hab_id'];
 				$_SESSION['region'] = $info[9];
 				for ($i = 7; $i <= 8; $i++) {
 					if (empty($info[$i])) {

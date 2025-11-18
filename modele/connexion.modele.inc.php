@@ -7,7 +7,22 @@ function getAllInformationCompte($matricule)
 
     try {
         $monPdo = connexionPDO();
-        $req = 'SELECT c.`COL_MATRICULE` as `matricule`,c.`COL_NOM` as `nom`,`COL_PRENOM` as `prenom`,c.`COL_ADRESSE` as `adresse`,c.`COL_CP` as `cp`,c.`COL_VILLE` as `ville`, concat(DAY(COL_DATEEMBAUCHE),\'/\',MONTH(`COL_DATEEMBAUCHE`),\'/\',YEAR(`COL_DATEEMBAUCHE`)) as `date_embauche`, h.HAB_LIB as `habilitation` ,s.SEC_LIBELLE as `secteur`, r.REG_NOM as `region` FROM collaborateur c LEFT JOIN secteur s ON s.`SEC_CODE`=c.`SEC_CODE` LEFT JOIN habilitation h ON h.HAB_ID=c.HAB_ID LEFT JOIN region r ON r.REG_CODE=c.REG_CODE WHERE c.COL_MATRICULE="' . $matricule . '"';
+        $req = 'SELECT c.`COL_MATRICULE` as `matricule`,
+                       c.`COL_NOM` as `nom`,
+                       c.`COL_PRENOM` as `prenom`,
+                       c.`COL_ADRESSE` as `adresse`,
+                       c.`COL_CP` as `cp`,
+                       c.`COL_VILLE` as `ville`, 
+                       concat(DAY(COL_DATEEMBAUCHE),\'/\',MONTH(`COL_DATEEMBAUCHE`),\'/\',YEAR(`COL_DATEEMBAUCHE`)) as `date_embauche`, 
+                       h.HAB_LIB as `habilitation`,
+                       s.SEC_LIBELLE as `secteur`, 
+                       r.REG_NOM as `region`,
+                       c.HAB_ID as `hab_id`
+                FROM collaborateur c 
+                LEFT JOIN secteur s ON s.`SEC_CODE`=c.`SEC_CODE` 
+                LEFT JOIN habilitation h ON h.HAB_ID=c.HAB_ID 
+                LEFT JOIN region r ON r.REG_CODE=c.REG_CODE 
+                WHERE c.COL_MATRICULE="' . $matricule . '"';
         $res = $monPdo->query($req);
         $result = $res->fetch();
 
