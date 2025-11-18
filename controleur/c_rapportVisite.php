@@ -43,7 +43,7 @@ case 'saisirrapport': {
 }
 
 case 'enregistrerrapport': {
-    
+    try {
     // Récupérer les infos du formulaire (sauf matricule)
     $numPraticien = $_POST['praticien'];
     $dateVisite = $_POST['dateVisite'];
@@ -63,16 +63,13 @@ case 'enregistrerrapport': {
         if (insertRapport($matriculeVisiteur, $numPraticien, $dateVisite, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numpratremp, $etat)) {
             $_SESSION['succes'] = 'Rapport bien enregistré !';
             header('Location: index.php?uc=rapportvisite&action=voirrapport');
-            exit;
-        } else {
-            $_SESSION['erreur'] = 'Erreur lors de l\'enregistrement du rapport';
-            header('Location: index.php?uc=rapportvisite&action=remplirrapport');
-            exit;
-        }
+            exit;}
+        
     } catch (Exception $e) {
         $_SESSION['erreur'] = 'Erreur lors de l\'enregistrement : ' . $e->getMessage();
         header('Location: index.php?uc=rapportvisite&action=remplirrapport');
         exit;
     }
+}
 }
 ?>
