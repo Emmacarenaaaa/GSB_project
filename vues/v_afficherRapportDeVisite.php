@@ -43,6 +43,12 @@
 
 <p><span class="carac">État du rapport</span> : <?php echo htmlspecialchars($carac[16]); ?></p>
 
+<?php if ($carac[17] == 1): // 17 est l'index de ET_CODE (ajouté à la fin) ?>
+    <div class="mt-4 text-center">
+        <a href="index.php?uc=rapportvisite&action=editerrapport&rapports=<?php echo $carac[3]; ?>" class="btn btn-warning text-white">Modifier le rapport</a>
+    </div>
+<?php endif; ?>
+
 
  </div>
             </div>

@@ -11,7 +11,7 @@ function getAllrapportDeVisite($dateDebut = null, $dateFin = null, $praticienNum
     $req = 'SELECT r.RAP_NUM, r.RAP_DATEVISITE, c.COL_NOM, c.COL_PRENOM
             FROM rapport_visite r
             LEFT JOIN collaborateur c ON r.COL_MATRICULE = c.COL_MATRICULE
-            WHERE 1=1';
+            WHERE 1=1 AND r.ET_CODE != 1';
     
     $params = [];
     
@@ -42,6 +42,27 @@ function getAllrapportDeVisite($dateDebut = null, $dateFin = null, $praticienNum
     print "Erreur !: " . $e->getMessage();
     die();
   }
+}
+
+function getLesRapportsBrouillon($matricule) {
+    try {
+        $monPdo = connexionPDO();
+        $req = 'SELECT r.RAP_NUM, r.RAP_DATEVISITE, c.COL_NOM, c.COL_PRENOM
+                FROM rapport_visite r
+                LEFT JOIN collaborateur c ON r.COL_MATRICULE = c.COL_MATRICULE
+                WHERE r.COL_MATRICULE = :matricule AND r.ET_CODE = 1
+                ORDER BY r.RAP_NUM';
+        
+        $res = $monPdo->prepare($req);
+        $res->bindParam(':matricule', $matricule, PDO::PARAM_STR);
+        $res->execute();
+        $result = $res->fetchAll();
+        
+        return $result;
+    } catch (PDOException $e) {
+        print "Erreur !: " . $e->getMessage();
+        die();
+    }
 }
 
 
@@ -80,7 +101,8 @@ function getAllInformationRapportDeVisiteNum($rapNum){
 
   md1.MED_DEPOTLEGAL AS medocpresenter1,
   md2.MED_DEPOTLEGAL AS medocpresenter2,
-  e.ETAT_LIBELLE AS etatrapport
+  e.ETAT_LIBELLE AS etatrapport,
+  r.ET_CODE AS etatcode
   
 FROM rapport_visite r
 LEFT JOIN collaborateur c ON r.COL_MATRICULE = c.COL_MATRICULE
@@ -96,7 +118,11 @@ WHERE r.RAP_NUM = :rapNum;";
     $res = $monPdo->prepare($req);
     $res->bindParam(':rapNum', $rapNum, PDO::PARAM_INT);
     $res->execute(); 
-    $result = array_values($res->fetch(PDO::FETCH_ASSOC));
+    $fetch = $res->fetch(PDO::FETCH_ASSOC);
+    if ($fetch === false) {
+        return false;
+    }
+    $result = array_values($fetch);
     return $result;
   } 
   
@@ -209,6 +235,37 @@ function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAut
         
     } catch (Exception $e) {
         error_log("✗ Erreur : " . $e->getMessage());
+        return false;
+    }
+}
+
+function updateRapport($rapNum, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numRemplacant, $etat) {
+    try {
+        $monPdo = connexionPDO();
+        $req = "UPDATE rapport_visite SET 
+                MO_CODE = :mo_code, 
+                RAP_MOTIF_AUTRE = :rap_motif_autre,
+                RAP_BILAN = :rap_bilan, 
+                MED_DEPOTLEGAL_PRESENTER1 = :medoc1, 
+                MED_DEPOTLEGAL_PRESENTER2 = :medoc2, 
+                PRA_NUM_REMPLACANT = :numRemplacant, 
+                ET_CODE = :et_code
+                WHERE RAP_NUM = :rap_num";
+        
+        $stmt = $monPdo->prepare($req);
+        $stmt->bindParam(':rap_num', $rapNum, PDO::PARAM_INT);
+        $stmt->bindParam(':mo_code', $motif, PDO::PARAM_INT);
+        $stmt->bindParam(':rap_motif_autre', $motifAutre, PDO::PARAM_STR);
+        $stmt->bindParam(':rap_bilan', $bilan, PDO::PARAM_STR);
+        $stmt->bindParam(':medoc1', $medoc1, PDO::PARAM_STR);
+        $stmt->bindParam(':medoc2', $medoc2, PDO::PARAM_STR);
+        $stmt->bindParam(':numRemplacant', $numRemplacant, PDO::PARAM_INT);
+        $stmt->bindParam(':et_code', $etat, PDO::PARAM_INT);
+        
+        $stmt->execute();
+        return true;
+    } catch (PDOException $e) {
+        error_log("Erreur updateRapport : " . $e->getMessage());
         return false;
     }
 }

@@ -77,6 +77,7 @@
       <?php if (!isset($_SESSION['hab_id']) || $_SESSION['hab_id'] != 3): ?>
 <div class="test col-12 col-sm-8 col-lg-6 col-xl-5 col-xxl-4 py-lg-5">
   <input class="btn btn-info text-light valider" type="button" value="Remplir un rapport" onclick="window.location.href='index.php?uc=rapportvisite&action=saisirrapport'">
+  <input class="btn btn-warning text-light valider mt-2" type="button" value="Mes rapports brouillon" onclick="window.location.href='index.php?uc=rapportvisite&action=mesRapportsBrouillon'">
   </div>
 <?php endif; ?>
     </div>
