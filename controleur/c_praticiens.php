@@ -12,8 +12,8 @@ switch ($action) {
 		}
 
 	case 'afficherprat': {
-			if (isset($_REQUEST['praticien']) && getAllInformationPraticienNum($_REQUEST['praticien'])) {
-				$prat = $_REQUEST['praticien'];
+			$prat = isset($_REQUEST['praticien']) ? $_REQUEST['praticien'] : (isset($_REQUEST['praticien_select']) ? $_REQUEST['praticien_select'] : null);
+			if ($prat && getAllInformationPraticienNum($prat)) {
 				$carac = getAllInformationPraticienNum($prat);
 				if (empty($carac[9])) {
 					$carac[9] = 'Non défini(e)';
@@ -72,7 +72,7 @@ switch ($action) {
 			}
 
 			// MODE EDITER : création d'un nouveau praticien
-			if ($formAction == 'creer') {
+			if ($formAction == 'creer' || (isset($_GET['option']) && $_GET['option'] == 'creer')) {
 				$mode = 'editer';
 				$infosPrat = array(
 					'matriculepraticien' => '',
@@ -124,11 +124,16 @@ switch ($action) {
 					try {
 						if (empty($num)) {
 							// Créer un nouveau praticien
-							$reqInsert = 'INSERT INTO praticien (PRA_NOM, PRA_PRENOM, PRA_ADRESSE, PRA_CP, PRA_VILLE, PRA_COEFNOTORIETE, PRA_COEFCONFIANCE, TYP_CODE) 
-										 VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+							// Générer un nouveau numéro de praticien
+							$reqMax = 'SELECT MAX(PRA_NUM) as max_num FROM praticien';
+							$resMax = $monPdo->query($reqMax);
+							$rowMax = $resMax->fetch();
+							$num = $rowMax['max_num'] + 1;
+
+							$reqInsert = 'INSERT INTO praticien (PRA_NUM, PRA_NOM, PRA_PRENOM, PRA_ADRESSE, PRA_CP, PRA_VILLE, PRA_COEFNOTORIETE, PRA_COEFCONFIANCE, TYP_CODE) 
+										 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
 							$resInsert = $monPdo->prepare($reqInsert);
-							$resInsert->execute(array($nom, $prenom, $adresse, $cp, $ville, $notoriete, $confiance, $type));
-							$num = $monPdo->lastInsertId();
+							$resInsert->execute(array($num, $nom, $prenom, $adresse, $cp, $ville, $notoriete, $confiance, $type));
 							$message = "Praticien créé avec succès !";
 						} else {
 							// Modifier un praticien existant
