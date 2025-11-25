@@ -51,6 +51,7 @@
 
       </div>
           <!-- FORMULAIRE D'AFFICHAGE -->
+        <?php if (isset($_SESSION['hab_id'])): ?>
         <form action="index.php?uc=rapportvisite&action=afficherrapport" method="post" class="formulaire-recherche col-12 m-0">
           <label class="titre-formulaire" for="rapports">Rapports disponibles :</label>
           
@@ -72,9 +73,10 @@
             <input class="btn btn-info text-light valider mt-3" type="submit" value="Afficher les informations">
           <?php endif; ?>
         </form>
+        <?php endif; ?>
         <div>
         </div>
-      <?php if (!isset($_SESSION['hab_id']) || $_SESSION['hab_id'] != 3): ?>
+      <?php if (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] != 3): ?>
 <div class="test col-12 col-sm-8 col-lg-6 col-xl-5 col-xxl-4 py-lg-5">
   <input class="btn btn-info text-light valider" type="button" value="Remplir un rapport" onclick="window.location.href='index.php?uc=rapportvisite&action=saisirrapport'">
   <input class="btn btn-warning text-light valider mt-2" type="button" value="Mes rapports brouillon" onclick="window.location.href='index.php?uc=rapportvisite&action=mesRapportsBrouillon'">
