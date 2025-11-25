@@ -27,6 +27,13 @@ switch ($action) {
 		}
 
 	case 'modif': {
+			// Vérifier les droits : Visiteur (1) n'a pas accès
+			if (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] == 1) {
+				$_SESSION['erreur'] = "Vous n'avez pas les droits pour gérer les praticiens.";
+				header("Location: index.php?uc=praticien&action=formulaireprat");
+				exit;
+			}
+
 			include_once 'modele/praticien.modele.inc.php';
 			include_once 'modele/bd.inc.php';
 
@@ -100,7 +107,7 @@ switch ($action) {
 				$confiance = isset($_POST['pracoefconfiance']) ? $_POST['pracoefconfiance'] : '';
 				$type = isset($_POST['typcode']) ? $_POST['typcode'] : '';
 				$specialites_sel = isset($_POST['specialites']) ? $_POST['specialites'] : []; 
-
+				
 				// Validation des champs obligatoires
 				if (empty($nom)) {
 					$errors[] = "Le nom du praticien est obligatoire";

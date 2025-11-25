@@ -40,6 +40,7 @@
             ?>
           </select>
 
+          <?php if (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] != 1): ?>
           <label for="visiteurFiltre">Visiteur (optionnel) :</label>
           <select name="visiteurFiltre" id="visiteurFiltre" class="form-select mb-3">
             <option value="">-- Tous les visiteurs --</option>
@@ -53,6 +54,7 @@
             }
             ?>
           </select>
+          <?php endif; ?>
           
           <div class="d-flex gap-2">
             <input class="btn btn-primary flex-grow-1" type="submit" value="Filtrer">
@@ -68,7 +70,7 @@
 
 
         <!-- TABLEAU D'AFFICHAGE -->
-        <?php if (isset($_SESSION['hab_id'])): ?>
+        <?php if (isset($_SESSION['hab_id']) && (!empty($result) || $_SESSION['hab_id'] != 3)): ?>
         <div class="col-12 m-0 mt-4">
           <h5 class="titre-formulaire">Historique des rapports :</h5>
           

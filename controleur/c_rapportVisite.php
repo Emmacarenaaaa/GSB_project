@@ -16,6 +16,12 @@ switch ($action) {
       // Récupérer les infos de l'utilisateur connecté pour avoir sa région
       $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
       $regionCode = $infosUtilisateur['reg_code'];
+      $habId = $_SESSION['hab_id'];
+
+      // Si Visiteur (1), on force le filtre sur son matricule
+      if ($habId == 1) {
+          $visiteurFiltre = $_SESSION['matricule'];
+      }
 
       // Récupérer les rapports filtrés
       $result = getAllRapportDeVisite($dateDebut, $dateFin, $praticienFiltre, $regionCode, $visiteurFiltre);
@@ -23,8 +29,11 @@ switch ($action) {
       // Récupérer la liste des praticiens pour le filtre
       $praticiens = getAllPraticiens();
       
-      // Récupérer la liste des visiteurs de la région pour le filtre
-      $visiteurs = getCollaborateursByRegion($regionCode);
+      // Récupérer la liste des visiteurs de la région pour le filtre (Uniquement pour Délégué/Responsable)
+      $visiteurs = [];
+      if ($habId != 1) {
+          $visiteurs = getCollaborateursByRegion($regionCode);
+      }
       
       include("vues/v_formulaireRapportsDeVisite.php");
       break;

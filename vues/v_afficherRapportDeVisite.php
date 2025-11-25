@@ -46,6 +46,11 @@
 <?php if ($carac[19] == 1): // 19 est l'index de ET_CODE (ajouté à la fin) ?>
     <div class="mt-4 text-center">
         <a href="index.php?uc=rapportvisite&action=editerrapport&rapports=<?php echo $carac[3]; ?>" class="btn btn-warning text-white">Modifier le rapport</a>
+        <a href="index.php?uc=rapportvisite&action=voirrapport" class="btn btn-secondary ms-2">Retour</a>
+    </div>
+<?php else: ?>
+    <div class="mt-4 text-center">
+        <a href="index.php?uc=rapportvisite&action=voirrapport" class="btn btn-secondary">Retour</a>
     </div>
 <?php endif; ?>
 
