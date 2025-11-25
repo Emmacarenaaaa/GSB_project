@@ -1,7 +1,7 @@
 <section class="bg-light">
     <div class="container">
         <div class="structure-hero pt-lg-5 pt-4">
-            <h1 class="titre text-center">Informations du médicament <span class="carac"><?php echo $carac[1]; ?></span></h1>
+            <h1 class="titre text-center">Détails du rapport de visite</h1>
         </div>
         <div class="row align-items-center justify-content-center">
             <div class="test col-12 col-sm-8 col-lg-6 col-xl-5 col-xxl-4 py-lg-5">
@@ -34,16 +34,16 @@
 <?php endif; ?>
 
 <?php if (!empty($carac[14])): ?>
-<p><span class="carac">Médicament présenté 1</span> : <?php echo htmlspecialchars($carac[14]); ?></p>
+<p><span class="carac">Médicament présenté 1</span> : <?php echo htmlspecialchars($carac[14] . ' - ' . $carac[15]); ?></p>
 <?php endif; ?>
 
 <?php if (!empty($carac[15])): ?>
-<p><span class="carac">Médicament présenté 2</span> : <?php echo htmlspecialchars($carac[15]); ?></p>
+<p><span class="carac">Médicament présenté 2</span> : <?php echo htmlspecialchars($carac[16] . ' - ' . $carac[17]); ?></p>
 <?php endif; ?>
 
-<p><span class="carac">État du rapport</span> : <?php echo htmlspecialchars($carac[16]); ?></p>
+<p><span class="carac">État du rapport</span> : <?php echo htmlspecialchars($carac[18]); ?></p>
 
-<?php if ($carac[17] == 1): // 17 est l'index de ET_CODE (ajouté à la fin) ?>
+<?php if ($carac[19] == 1): // 19 est l'index de ET_CODE (ajouté à la fin) ?>
     <div class="mt-4 text-center">
         <a href="index.php?uc=rapportvisite&action=editerrapport&rapports=<?php echo $carac[3]; ?>" class="btn btn-warning text-white">Modifier le rapport</a>
     </div>

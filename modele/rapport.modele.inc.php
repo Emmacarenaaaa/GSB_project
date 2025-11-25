@@ -1,47 +1,87 @@
 <?php
 
+function getAllRapportDeVisite($dateDebut = null, $dateFin = null, $praticienFiltre = null, $region = null, $visiteur = null) {
+    try {
+        $monPdo = connexionPDO();
+        $req = "SELECT r.RAP_NUM, r.RAP_DATEVISITE, c.COL_NOM, c.COL_PRENOM, 
+                       p.PRA_NUM, p.PRA_NOM, p.PRA_PRENOM, 
+                       m.MO_LIBELLE, r.RAP_MOTIF_AUTRE,
+                       md1.MED_NOMCOMMERCIAL as MED1, md2.MED_NOMCOMMERCIAL as MED2
+                FROM rapport_visite r
+                LEFT JOIN collaborateur c ON r.COL_MATRICULE = c.COL_MATRICULE
+                LEFT JOIN praticien p ON r.PRA_NUM = p.PRA_NUM
+                LEFT JOIN motif m ON r.MO_CODE = m.MO_CODE
+                LEFT JOIN medicament md1 ON r.MED_DEPOTLEGAL_PRESENTER1 = md1.MED_DEPOTLEGAL
+                LEFT JOIN medicament md2 ON r.MED_DEPOTLEGAL_PRESENTER2 = md2.MED_DEPOTLEGAL
+                WHERE 1=1 AND r.ET_CODE != 1"; // Exclure les brouillons
 
-include_once 'bd.inc.php';
+        // Filtre par région (obligatoire pour les utilisateurs connectés)
+        if ($region) {
+            $req .= " AND c.REG_CODE = :region";
+        }
 
+        // Filtre par visiteur
+        if ($visiteur) {
+            $req .= " AND r.COL_MATRICULE = :visiteur";
+        }
 
-function getAllrapportDeVisite($dateDebut = null, $dateFin = null, $praticienNum = null){
-  try {
-    $monPdo = connexionPDO();
-    
-    $req = 'SELECT r.RAP_NUM, r.RAP_DATEVISITE, c.COL_NOM, c.COL_PRENOM
-            FROM rapport_visite r
-            LEFT JOIN collaborateur c ON r.COL_MATRICULE = c.COL_MATRICULE
-            WHERE 1=1 AND r.ET_CODE != 1';
-    
-    $params = [];
-    
-    if ($dateDebut !== null && $dateDebut !== '') {
-      $req .= ' AND r.RAP_DATEVISITE >= :dateDebut';
-      $params[':dateDebut'] = $dateDebut;
+        // Filtres existants
+        if ($dateDebut) {
+            $req .= " AND r.RAP_DATEVISITE >= :dateDebut";
+        }
+        if ($dateFin) {
+            $req .= " AND r.RAP_DATEVISITE <= :dateFin";
+        }
+        if ($praticienFiltre) {
+            $req .= " AND r.PRA_NUM = :praticien";
+        }
+
+        $req .= " ORDER BY r.RAP_DATEVISITE DESC, r.RAP_NUM DESC";
+
+        $stmt = $monPdo->prepare($req);
+
+        if ($region) {
+            $stmt->bindValue(':region', $region, PDO::PARAM_STR);
+        }
+        if ($visiteur) {
+            $stmt->bindValue(':visiteur', $visiteur, PDO::PARAM_STR);
+        }
+        if ($dateDebut) {
+            $stmt->bindValue(':dateDebut', $dateDebut, PDO::PARAM_STR);
+        }
+        if ($dateFin) {
+            $stmt->bindValue(':dateFin', $dateFin, PDO::PARAM_STR);
+        }
+        if ($praticienFiltre) {
+            $stmt->bindValue(':praticien', $praticienFiltre, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    } catch (PDOException $e) {
+        print "Erreur !: " . $e->getMessage();
+        die();
     }
-    
-    if ($dateFin !== null && $dateFin !== '') {
-      $req .= ' AND r.RAP_DATEVISITE <= :dateFin';
-      $params[':dateFin'] = $dateFin;
+}
+
+function getCollaborateursByRegion($region) {
+    try {
+        $monPdo = connexionPDO();
+        $req = "SELECT COL_MATRICULE, COL_NOM, COL_PRENOM 
+                FROM collaborateur 
+                WHERE REG_CODE = :region 
+                ORDER BY COL_NOM, COL_PRENOM";
+        
+        $stmt = $monPdo->prepare($req);
+        $stmt->bindValue(':region', $region, PDO::PARAM_STR);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        print "Erreur !: " . $e->getMessage();
+        die();
     }
-    
-    if ($praticienNum !== null && $praticienNum !== '') {
-      $req .= ' AND r.PRA_NUM = :praticien';
-      $params[':praticien'] = intval($praticienNum);
-    }
-    
-    $req .= ' ORDER BY r.RAP_NUM';
-    
-    $res = $monPdo->prepare($req);
-    $res->execute($params);
-    $result = $res->fetchAll();
-    
-    return $result;
-    
-  } catch (PDOException $e) {
-    print "Erreur !: " . $e->getMessage();
-    die();
-  }
 }
 
 function getLesRapportsBrouillon($matricule) {
@@ -100,7 +140,9 @@ function getAllInformationRapportDeVisiteNum($rapNum){
   pr.PRA_PRENOM AS prenomremplacant,
 
   md1.MED_DEPOTLEGAL AS medocpresenter1,
+  md1.MED_NOMCOMMERCIAL AS medocnom1,
   md2.MED_DEPOTLEGAL AS medocpresenter2,
+  md2.MED_NOMCOMMERCIAL AS medocnom2,
   e.ETAT_LIBELLE AS etatrapport,
   r.ET_CODE AS etatcode
   

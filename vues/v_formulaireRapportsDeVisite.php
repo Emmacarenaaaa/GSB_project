@@ -39,6 +39,20 @@
             } 
             ?>
           </select>
+
+          <label for="visiteurFiltre">Visiteur (optionnel) :</label>
+          <select name="visiteurFiltre" id="visiteurFiltre" class="form-select mb-3">
+            <option value="">-- Tous les visiteurs --</option>
+            <?php 
+            $visiteurSelectionne = isset($_POST['visiteurFiltre']) ? $_POST['visiteurFiltre'] : '';
+            if (isset($visiteurs)) {
+                foreach($visiteurs as $visiteur) {
+                  $selected = ($visiteurSelectionne == $visiteur['COL_MATRICULE']) ? 'selected' : '';
+                  echo '<option value="'.$visiteur['COL_MATRICULE'].'" '.$selected.'>'.htmlspecialchars($visiteur['COL_NOM'].' '.$visiteur['COL_PRENOM']).'</option>';
+                }
+            }
+            ?>
+          </select>
           
           <div class="d-flex gap-2">
             <input class="btn btn-primary flex-grow-1" type="submit" value="Filtrer">
@@ -51,28 +65,63 @@
 
       </div>
           <!-- FORMULAIRE D'AFFICHAGE -->
+
+
+        <!-- TABLEAU D'AFFICHAGE -->
         <?php if (isset($_SESSION['hab_id'])): ?>
-        <form action="index.php?uc=rapportvisite&action=afficherrapport" method="post" class="formulaire-recherche col-12 m-0">
-          <label class="titre-formulaire" for="rapports">Rapports disponibles :</label>
+        <div class="col-12 m-0 mt-4">
+          <h5 class="titre-formulaire">Historique des rapports :</h5>
           
           <?php if (empty($result)): ?>
             <p class="alert alert-warning mt-3">Aucun rapport trouvé avec ces critères.</p>
           <?php else: ?>
-            <select required name="rapports" id="rapports" class="form-select mt-3">
-              <option value="">- Choisissez un rapport -</option>
-              <?php
-              foreach ($result as $key) {
-                // Formatage de la date en jj/mm/aaaa
-                $dateVisite = date('d/m/Y', strtotime($key['RAP_DATEVISITE']));
-                $label = $key['RAP_NUM'] . ' - ' . $dateVisite . ' - ' . $key['COL_NOM'] . ' ' . $key['COL_PRENOM'];
-                echo '<option value="' . htmlspecialchars($key['RAP_NUM']) . '">' . htmlspecialchars($label) . '</option>';
-              }
-              ?>
-            </select>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Num</th>
+                            <th>Visiteur</th>
+                            <th>Praticien</th>
+                            <th>Motif</th>
+                            <th>Date</th>
+                            <th>Médicaments</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                      <?php foreach ($result as $rapport): ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($rapport['RAP_NUM']); ?></td>
+                            <td><?php echo htmlspecialchars($rapport['COL_NOM'] . ' ' . $rapport['COL_PRENOM']); ?></td>
+                            <td><?php echo htmlspecialchars($rapport['PRA_NOM'] . ' ' . $rapport['PRA_PRENOM']); ?></td>
+                            <td>
+                                <?php 
+                                    echo htmlspecialchars($rapport['MO_LIBELLE']);
+                                    if (!empty($rapport['RAP_MOTIF_AUTRE'])) {
+                                        echo ' (' . htmlspecialchars($rapport['RAP_MOTIF_AUTRE']) . ')';
+                                    }
+                                ?>
+                            </td>
+                            <td><?php echo date('d/m/Y', strtotime($rapport['RAP_DATEVISITE'])); ?></td>
+                            <td>
+                                <?php 
+                                    $meds = [];
+                                    if (!empty($rapport['MED1'])) $meds[] = $rapport['MED1'];
+                                    if (!empty($rapport['MED2'])) $meds[] = $rapport['MED2'];
+                                    echo htmlspecialchars(implode(', ', $meds));
+                                ?>
+                            </td>
+                            <td>
+                                <a href="index.php?uc=rapportvisite&action=afficherrapport&rapports=<?php echo $rapport['RAP_NUM']; ?>" class="btn btn-sm btn-info text-white">Voir</a>
+                            </td>
+                        </tr>
+                      <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
             <small class="text-muted"><?php echo count($result); ?> rapport(s) trouvé(s)</small>
-            <input class="btn btn-info text-light valider mt-3" type="submit" value="Afficher les informations">
           <?php endif; ?>
-        </form>
+        </div>
         <?php endif; ?>
         <div>
         </div>

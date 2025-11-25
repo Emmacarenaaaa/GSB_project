@@ -17,7 +17,8 @@ function getAllInformationCompte($matricule)
                        h.HAB_LIB as `habilitation`,
                        s.SEC_LIBELLE as `secteur`, 
                        r.REG_NOM as `region`,
-                       c.HAB_ID as `hab_id`
+                       c.HAB_ID as `hab_id`,
+                       c.REG_CODE as `reg_code`
                 FROM collaborateur c 
                 LEFT JOIN secteur s ON s.`SEC_CODE`=c.`SEC_CODE` 
                 LEFT JOIN habilitation h ON h.HAB_ID=c.HAB_ID 

@@ -5,18 +5,27 @@ if (!isset($_REQUEST['action']) || empty($_REQUEST['action'])) {
 } else {
   $action = $_REQUEST['action'];
 }
+
 switch ($action) {
   case 'voirrapport': {
-
       $dateDebut = isset($_POST['dateDebut']) && !empty($_POST['dateDebut']) ? $_POST['dateDebut'] : null;
       $dateFin = isset($_POST['dateFin']) && !empty($_POST['dateFin']) ? $_POST['dateFin'] : null;
       $praticienFiltre = isset($_POST['praticienFiltre']) && !empty($_POST['praticienFiltre']) ? $_POST['praticienFiltre'] : null;
-      
+      $visiteurFiltre = isset($_POST['visiteurFiltre']) && !empty($_POST['visiteurFiltre']) ? $_POST['visiteurFiltre'] : null;
+
+      // Récupérer les infos de l'utilisateur connecté pour avoir sa région
+      $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
+      $regionCode = $infosUtilisateur['reg_code'];
+
       // Récupérer les rapports filtrés
-      $result = getAllRapportDeVisite($dateDebut, $dateFin, $praticienFiltre);
+      $result = getAllRapportDeVisite($dateDebut, $dateFin, $praticienFiltre, $regionCode, $visiteurFiltre);
       
       // Récupérer la liste des praticiens pour le filtre
       $praticiens = getAllPraticiens();
+      
+      // Récupérer la liste des visiteurs de la région pour le filtre
+      $visiteurs = getCollaborateursByRegion($regionCode);
+      
       include("vues/v_formulaireRapportsDeVisite.php");
       break;
     }
