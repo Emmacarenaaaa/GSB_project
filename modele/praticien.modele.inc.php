@@ -2,27 +2,27 @@
 
 include_once 'bd.inc.php';
 
-function getAllNomPraticien(){
+function getAllNomPraticien()
+{
 
-    try{
+    try {
         $monPdo = connexionPDO();
         $req = 'SELECT PRA_NUM, PRA_PRENOM, PRA_NOM FROM praticien ORDER BY PRA_NOM';
         $res = $monPdo->query($req);
         $result = $res->fetchAll();
         return $result;
-    } 
-
-    catch (PDOException $e){
+    } catch (PDOException $e) {
         print "Erreur !: " . $e->getMessage();
         die();
     }
 
 }
-    //,PRA_ADRESSE,PRA_CP, PRA_VILLE,PRA_COEFNOTORIETE,TYP_CODE
+//,PRA_ADRESSE,PRA_CP, PRA_VILLE,PRA_COEFNOTORIETE,TYP_CODE
 
-function getAllInformationPraticienNum($matricule){
+function getAllInformationPraticienNum($matricule)
+{
 
-    try{
+    try {
         $monPdo = connexionPDO();
         $req = 'SELECT p.PRA_NUM as \'matriculepraticien\',
         p.PRA_NOM as \'nom\',
@@ -35,21 +35,20 @@ function getAllInformationPraticienNum($matricule){
         
         t.TYP_LIBELLE as \'typedepraticien\'
         FROM praticien p INNER JOIN type_praticien t ON t.TYP_CODE = p.TYP_CODE 
-        WHERE p.PRA_NUM = "'.$matricule.'"';
+        WHERE p.PRA_NUM = "' . $matricule . '"';
         $res = $monPdo->query($req);
-        $result = $res->fetch();    
+        $result = $res->fetch();
         return $result;
-    } 
-    
-    catch (PDOException $e){
+    } catch (PDOException $e) {
         print "Erreur !: " . $e->getMessage();
         die();
     }
 }
 
-function getAllInformationPraticienNom($nom){
+function getAllInformationPraticienNom($nom)
+{
 
-    try{
+    try {
         $monPdo = connexionPDO();
         $req = 'SELECT p.PRA_NUM as \'matriculepraticien\',
         p.PRA_NOM as \'nom\',
@@ -62,48 +61,81 @@ function getAllInformationPraticienNom($nom){
         
 
         t.TYP_LIBELLE as \'typedepraticien\'
-        FROM praticien p INNER JOIN type_praticien t ON t.TYP_CODE = p.TYP_CODE WHERE p.PRA_NOM = "'.$nom.'"';
+        FROM praticien p INNER JOIN type_praticien t ON t.TYP_CODE = p.TYP_CODE WHERE p.PRA_NOM = "' . $nom . '"';
         $res = $monPdo->query($req);
-        $result = $res->fetch();    
+        $result = $res->fetch();
         return $result;
-    } 
-    
-    catch (PDOException $e){
+    } catch (PDOException $e) {
         print "Erreur !: " . $e->getMessage();
         die();
     }
 }
 
-function getPraticien($nom){
+function getPraticien($nom)
+{
 
-    try{
+    try {
         $monPdo = connexionPDO();
-        $req = 'SELECT PRA_NUM, PRA_PRENOM, PRA_NOM FROM praticien WHERE PRA_NOM = "'.$nom.'"';
+        $req = 'SELECT PRA_NUM, PRA_PRENOM, PRA_NOM FROM praticien WHERE PRA_NOM = "' . $nom . '"';
         $res = $monPdo->query($req);
-        $result = $res->fetch();    
+        $result = $res->fetch();
         return $result;
-    } 
-    
-    catch (PDOException $e){
+    } catch (PDOException $e) {
         print "Erreur !: " . $e->getMessage();
         die();
     }
 }
 
-function getNbPraticien(){
+function getNbPraticien()
+{
 
-    try{
+    try {
         $monPdo = connexionPDO();
         $req = 'SELECT COUNT(PRA_NUM) as \'nb\' FROM praticien';
         $res = $monPdo->query($req);
-        $result = $res->fetch();    
+        $result = $res->fetch();
         return $result;
-    } 
-    
-    catch (PDOException $e){
+    } catch (PDOException $e) {
         print "Erreur !: " . $e->getMessage();
         die();
     }
 }
 
+
+function getPraticiensBySecteur($secteur)
+{
+    try {
+        $monPdo = connexionPDO();
+        $req = 'SELECT DISTINCT p.PRA_NUM, p.PRA_PRENOM, p.PRA_NOM 
+                FROM praticien p
+                JOIN departement d ON LEFT(p.PRA_CP, 2) = d.NoDEPT
+                JOIN region r ON d.REG_CODE = r.REG_CODE
+                WHERE r.SEC_CODE = "' . $secteur . '"
+                ORDER BY p.PRA_NOM';
+        $res = $monPdo->query($req);
+        $result = $res->fetchAll();
+        return $result;
+    } catch (PDOException $e) {
+        print "Erreur !: " . $e->getMessage();
+        die();
+    }
+}
+
+function getPraticiensByRegion($region)
+{
+    try {
+        $monPdo = connexionPDO();
+        $req = 'SELECT DISTINCT p.PRA_NUM, p.PRA_PRENOM, p.PRA_NOM 
+                FROM praticien p
+                JOIN departement d ON LEFT(p.PRA_CP, 2) = d.NoDEPT
+                WHERE d.REG_CODE = "' . $region . '"
+                ORDER BY p.PRA_NOM';
+        $res = $monPdo->query($req);
+        $result = $res->fetchAll();
+        return $result;
+    } catch (PDOException $e) {
+        print "Erreur !: " . $e->getMessage();
+        die();
+    }
+}
 ?>
