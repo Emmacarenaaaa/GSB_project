@@ -12,32 +12,32 @@
                 <img class="img-fluid size-img-page" src="assets/img/praticien.jpg">
             </div>
             <div class="test col-12 col-sm-8 col-lg-6 col-xl-5 col-xxl-4 py-lg-5 py-3">
-                <?php if ($_SESSION['erreur']) {
+                <?php if (isset($_SESSION['erreur']) && $_SESSION['erreur']) {
                     echo '<p class="alert alert-danger text-center w-100">Un problème est survenu lors de la selection du praticien</p>';
                     $_SESSION['erreur'] = false;
                 } ?>
-                <form action="index.php?uc=praticien&action=afficherprat" method="post" class="formulaire-recherche col-12 m-0">
+                <form action="index.php?uc=praticien&action=afficherprat" method="post"
+                    class="formulaire-recherche col-12 m-0">
                     <label class="titre-formulaire" for="listeprat">Praticiens disponible :</label>
                     <select required name="praticien" class="form-select mt-3">
                         <option value class="text-center">- Choisissez un praticien -</option>
                         <?php
                         foreach ($result as $key) {
-                            echo '<option value="' . $key['PRA_NUM'] . '" class="form-control">' . $key['PRA_NUM'] . ' - ' . $key['PRA_NOM'] . ' - ' . $key['PRA_PRENOM'] .'</option>';
+                            echo '<option value="' . $key['PRA_NUM'] . '" class="form-control">' . $key['PRA_NUM'] . ' - ' . $key['PRA_NOM'] . ' - ' . $key['PRA_PRENOM'] . '</option>';
                         }
                         ?>
                     </select>
                     <input class="btn btn-info text-light valider" type="submit" value="Afficher les informations">
                     <?php if (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] != 1): ?>
-                    <a href="index.php?uc=praticien&action=modif" class="btn btn-warning" style="margin-left:15px;">
-                        Gérer praticiens
-                    </a>
+                        <a href="index.php?uc=praticien&action=modif" class="btn btn-warning" style="margin-left:15px;">
+                            Gérer praticiens
+                        </a>
                     <?php endif; ?>
                 </form>
-                
-                        </div>
+
+            </div>
 
 
         </div>
     </div>
 </section>
-

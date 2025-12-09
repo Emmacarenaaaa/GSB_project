@@ -87,6 +87,118 @@ switch ($action) {
             header('Location: index.php?uc=rapportvisite&action=voirrapport');
             exit;
         }
+        // Pour afficher le formulaire de saisie
+        $motifs = getMotifs();
+        $praticiens = getAllPraticiens();
+        $medicaments = getMedicaments();
+
+        $mode = 'creation'; // Indicateur pour la vue
+        include("vues/v_formulaireRapportDeVisite.php");
+        break;
+    }
+
+    case 'enregistrerrapport': {
+        try {
+            // Récupérer les infos du formulaire (sauf matricule)
+            $numPraticien = $_POST['praticien'];
+            $dateVisite = $_POST['dateVisite'];
+            $motif = $_POST['motif'];
+            $bilan = $_POST['bilan'];
+
+            $motifAutre = (isset($_POST['motif_autre']) && $motif == 4) ? trim($_POST['motif_autre']) : null;
+
+            // Médocs et remplaçant optionnels
+            $medoc1 = !empty($_POST['medoc1']) ? $_POST['medoc1'] : null;
+            $medoc2 = !empty($_POST['medoc2']) ? $_POST['medoc2'] : null;
+            $numRemplacant = !empty($_POST['numRemplacant']) ? $_POST['numRemplacant'] : null;
+            $etat = !empty($_POST['etat']) ? $_POST['etat'] : 0;
+            $matricule = $_SESSION['matricule'];
+
+            // Validation de la longueur du bilan
+            if (strlen($bilan) > 255) {
+                $_SESSION['erreur'] = 'Le bilan ne peut pas dépasser 255 caractères.';
+                header('Location: index.php?uc=rapportvisite&action=saisirrapport');
+                exit;
+            }
+
+            // Validation du motif autre
+            $motifAutre = null;
+            if ($motif == 4) {
+                if (empty($_POST['motif_autre'])) {
+                    $_SESSION['erreur'] = 'Veuillez préciser le motif.';
+                    header('Location: index.php?uc=rapportvisite&action=saisirrapport');
+                    exit;
+                }
+                $motifAutre = trim($_POST['motif_autre']);
+                if (strlen($motifAutre) > 50) {
+                    $_SESSION['erreur'] = 'Le motif personnalisé ne peut pas dépasser 50 caractères.';
+                    header('Location: index.php?uc=rapportvisite&action=saisirrapport');
+                    exit;
+                }
+            }
+
+            // Validation du format de date
+            $dateObj = DateTime::createFromFormat('Y-m-d', $dateVisite);
+            if (!$dateObj || $dateObj->format('Y-m-d') !== $dateVisite) {
+                $_SESSION['erreur'] = 'Format de date invalide.';
+                header('Location: index.php?uc=rapportvisite&action=saisirrapport');
+                exit;
+            }
+
+            // Médocs et remplaçant optionnels
+            $medoc1 = !empty($_POST['medoc1']) ? trim($_POST['medoc1']) : null;
+            $medoc2 = !empty($_POST['medoc2']) ? trim($_POST['medoc2']) : null;
+            $numRemplacant = !empty($_POST['numRemplacant']) ? intval($_POST['numRemplacant']) : null;
+
+            // Insertion
+            $resultat = insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numRemplacant, $etat);
+
+            if ($resultat) {
+                $_SESSION['succes'] = 'Rapport bien enregistré !';
+                header('Location: index.php?uc=rapportvisite&action=voirrapport');
+                exit;
+            } else {
+                $_SESSION['erreur'] = 'Échec de l\'enregistrement du rapport.';
+                header('Location: index.php?uc=rapportvisite&action=saisirrapport');
+                exit;
+            }
+
+        } catch (Exception $e) {
+            $_SESSION['erreur'] = 'Erreur lors de l\'enregistrement : ' . $e->getMessage();
+            header('Location: index.php?uc=rapportvisite&action=saisirrapport');
+            exit;
+        }
+    }
+
+    case 'editerrapport': {
+        $rapNum = $_REQUEST['rapports'];
+        $carac = getAllInformationRapportDeVisiteNum($rapNum);
+
+        if ($carac === false) {
+            $_SESSION['erreur'] = "Rapport introuvable.";
+            header("Location: index.php?uc=rapportvisite&action=voirrapport");
+            exit;
+        }
+
+        // Vérifier si le rapport est bien en état "Nouveau" (1)
+        if ($carac[17] != 1) {
+            $_SESSION['erreur'] = "Ce rapport n'est pas modifiable.";
+            header("Location: index.php?uc=rapportvisite&action=voirrapport");
+            exit;
+        }
+
+        $motifs = getMotifs();
+        $praticiens = getAllPraticiens();
+        $medicaments = getMedicaments();
+
+        $mode = 'modification'; // Indicateur pour la vue
+        include("vues/v_formulaireRapportDeVisite.php");
+        break;
+    }
+
+    case 'sauvegarderModification': {
+        try {
+            $rapNum = $_POST['rapNum'];
             $motif = $_POST['motif'];
             $bilan = $_POST['bilan'];
             $etat = $_POST['etat'];
@@ -128,6 +240,6 @@ switch ($action) {
             exit;
         }
     }
-
 }
+
 ?>
