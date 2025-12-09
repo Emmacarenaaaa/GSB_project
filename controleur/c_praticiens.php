@@ -22,12 +22,21 @@ switch ($action) {
 	}
 
 	case 'afficherprat': {
+		$monPdo = connexionPDO();
 		$prat = isset($_REQUEST['praticien']) ? $_REQUEST['praticien'] : (isset($_REQUEST['praticien_select']) ? $_REQUEST['praticien_select'] : null);
 		if ($prat && getAllInformationPraticienNum($prat)) {
 			$carac = getAllInformationPraticienNum($prat);
 			if (empty($carac[9])) {
 				$carac[9] = 'Non défini(e)';
 			}
+            
+            // Récupérer les spécialités pour l'affichage
+            $reqSpe = 'SELECT s.SPE_LIBELLE FROM specialite s 
+                       INNER JOIN posseder p ON p.SPE_CODE = s.SPE_CODE 
+                       WHERE p.PRA_NUM = ' . $prat;
+            $resSpe = $monPdo->query($reqSpe);
+            $specialites_affichage = $resSpe->fetchAll(PDO::FETCH_COLUMN);
+
 			include("vues/v_afficherPraticien.php");
 		} else {
 			$_SESSION['erreur'] = true;
@@ -135,12 +144,7 @@ switch ($action) {
 				$errors[] = "Le type de praticien est obligatoire";
 			}
 
-			// Vérifier si spécialités sélectionnées
-			if (empty($specialites_sel)) {
-				if (!isset($_POST['confirmer_sans_specialite'])) {
-					$errors[] = "Aucune spécialité sélectionnée. Veuillez sélectionner au moins une spécialité ou confirmer.";
-				}
-			}
+
 
 			// Si pas d'erreurs, enregistrer en base
 			if (empty($errors)) {
