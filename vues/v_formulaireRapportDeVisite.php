@@ -121,9 +121,9 @@ $etatVal = $isModification ? 1 : 1; // Par défaut Nouveau
             <div class="d-flex justify-content-between">
                 <?php if ($isModification): ?>
                     <a href="index.php?uc=rapportvisite&action=voirrapport" class="btn btn-secondary">Annuler</a>
-                    <input class="btn btn-success" type="submit" value="Enregistrer les modifications">
+                    <input class="btn btn-info text-light valider" type="submit" value="Enregistrer les modifications">
                 <?php else: ?>
-                    <input class="btn btn-success" type="submit" value="Enregistrer le rapport">
+                    <input class="btn btn-info text-light valider" type="submit" value="Enregistrer le rapport">
                 <?php endif; ?>
             </div>
         </form>

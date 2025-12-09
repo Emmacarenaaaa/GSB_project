@@ -17,14 +17,32 @@ switch ($action) {
      * Action : voirrapport
      * Affiche la liste des rapports de visite avec possibilité de filtrage.
      */
+    /**
+     * Action : voirrapport
+     * Affiche uniquement le formulaire de filtre pour sélectionner les rapports.
+     */
     case 'voirrapport': {
+        // Récupérer les infos de l'utilisateur connecté
+        $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
+        $regionCode = $infosUtilisateur['reg_code'];
+
+        // Récupérer la liste des praticiens pour le filtre (filtré par région)
+        $praticiens = getPraticiensByRegion($regionCode);
+
+        include("vues/v_selectionnerRapport.php");
+        break;
+    }
+
+    /**
+     * Action : validerSelection
+     * Traite le filtre et affiche la liste des rapports correspondants.
+     */
+    case 'validerSelection': {
         // Récupération des filtres depuis le formulaire (POST)
         $dateDebut = isset($_POST['dateDebut']) && !empty($_POST['dateDebut']) ? $_POST['dateDebut'] : null;
         $dateFin = isset($_POST['dateFin']) && !empty($_POST['dateFin']) ? $_POST['dateFin'] : null;
-        
-        // Filtre praticien : on récupère la valeur si elle existe
         $praticienFiltre = isset($_POST['praticienFiltre']) && !empty($_POST['praticienFiltre']) ? $_POST['praticienFiltre'] : null;
-        
+
         // Le filtre visiteur n'est plus utilisé ici (géré par région/secteur/id)
         $visiteurFiltre = null;
 
@@ -48,13 +66,7 @@ switch ($action) {
         // Appel au modèle pour récupérer la liste des rapports filtrés
         $result = getAllRapportDeVisite($dateDebut, $dateFin, $praticienFiltre, $regionCode, $visiteurFiltre, $secteurFiltre);
 
-        // Récupérer la liste des praticiens pour alimenter la liste déroulante du filtre
-        // On ne récupère que les praticiens de la région de l'utilisateur
-        $praticiens = getPraticiensByRegion($regionCode);
-
-
-        // Inclusion de la vue pour afficher le formulaire de recherche et le tableau de résultats
-        include("vues/v_formulaireRapportsDeVisite.php");
+        include("vues/v_listeRapports.php");
         break;
     }
 
@@ -112,16 +124,16 @@ switch ($action) {
             header('Location: index.php?uc=rapportvisite&action=voirrapport');
             exit;
         }
-        
+
         // Chargement des données nécessaires au formulaire (motifs, médicaments...)
         $motifs = getMotifs();
-        
+
         // Récupération de la région de l'utilisateur pour filtrer les praticiens
         $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
         $regionCode = $infosUtilisateur['reg_code'];
         // On ne liste que les praticiens de la région
         $praticiens = getPraticiensByRegion($regionCode);
-        
+
         $medicaments = getMedicaments();
 
         $mode = 'creation'; // Indicateur pour la vue (titre, action du form...)
@@ -231,12 +243,12 @@ switch ($action) {
 
         // Chargement des données pour les listes déroulantes
         $motifs = getMotifs();
-        
+
         // Récupération de la région pour filtrer les praticiens
         $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
         $regionCode = $infosUtilisateur['reg_code'];
         $praticiens = getPraticiensByRegion($regionCode);
-        
+
         $medicaments = getMedicaments();
 
         $mode = 'modification'; // Indicateur pour la vue
