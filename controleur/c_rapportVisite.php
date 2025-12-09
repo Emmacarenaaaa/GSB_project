@@ -11,7 +11,7 @@ switch ($action) {
         $dateDebut = isset($_POST['dateDebut']) && !empty($_POST['dateDebut']) ? $_POST['dateDebut'] : null;
         $dateFin = isset($_POST['dateFin']) && !empty($_POST['dateFin']) ? $_POST['dateFin'] : null;
         $praticienFiltre = isset($_POST['praticienFiltre']) && !empty($_POST['praticienFiltre']) ? $_POST['praticienFiltre'] : null;
-        $visiteurFiltre = isset($_POST['visiteurFiltre']) && !empty($_POST['visiteurFiltre']) ? $_POST['visiteurFiltre'] : null;
+        $visiteurFiltre = null;
 
         // Récupérer les infos de l'utilisateur connecté pour avoir sa région
         $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
@@ -33,16 +33,9 @@ switch ($action) {
         // Récupérer les rapports filtrés
         $result = getAllRapportDeVisite($dateDebut, $dateFin, $praticienFiltre, $regionCode, $visiteurFiltre, $secteurFiltre);
 
-        // Récupérer la liste des praticiens pour le filtre
-        $praticiens = getAllPraticiens();
+        // Récupérer la liste des praticiens pour le filtre (filtré par région)
+        $praticiens = getPraticiensByRegion($regionCode);
 
-        // Récupérer la liste des visiteurs pour le filtre
-        $visiteurs = [];
-        if ($habId == 2) { // Délégué Régional
-            $visiteurs = getCollaborateursByRegion($regionCode);
-        } elseif ($habId == 3 && $secCode) { // Responsable Secteur
-            $visiteurs = getCollaborateursBySecteur($secCode);
-        }
 
         include("vues/v_formulaireRapportsDeVisite.php");
         break;

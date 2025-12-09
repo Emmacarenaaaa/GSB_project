@@ -28,6 +28,7 @@
           <input type="date" name="dateFin" id="dateFin" class="form-control mb-3"
                  value="<?php echo isset($_POST['dateFin']) ? htmlspecialchars($_POST['dateFin']) : ''; ?>">
           
+
           <label for="praticienFiltre">Praticien (optionnel) :</label>
           <select name="praticienFiltre" id="praticienFiltre" class="form-select mb-3">
             <option value="">-- Tous les praticiens --</option>
@@ -40,21 +41,6 @@
             ?>
           </select>
 
-          <?php if (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] != 1): ?>
-          <label for="visiteurFiltre">Visiteur (optionnel) :</label>
-          <select name="visiteurFiltre" id="visiteurFiltre" class="form-select mb-3">
-            <option value="">-- Tous les visiteurs --</option>
-            <?php 
-            $visiteurSelectionne = isset($_POST['visiteurFiltre']) ? $_POST['visiteurFiltre'] : '';
-            if (isset($visiteurs)) {
-                foreach($visiteurs as $visiteur) {
-                  $selected = ($visiteurSelectionne == $visiteur['COL_MATRICULE']) ? 'selected' : '';
-                  echo '<option value="'.$visiteur['COL_MATRICULE'].'" '.$selected.'>'.htmlspecialchars($visiteur['COL_NOM'].' '.$visiteur['COL_PRENOM']).'</option>';
-                }
-            }
-            ?>
-          </select>
-          <?php endif; ?>
           
           <div class="d-flex gap-2">
             <input class="btn btn-primary flex-grow-1" type="submit" value="Filtrer">
