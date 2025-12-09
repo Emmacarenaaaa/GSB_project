@@ -19,7 +19,7 @@ function getAllRapportDeVisite($dateDebut = null, $dateFin = null, $praticienFil
             $req .= " LEFT JOIN region reg ON c.REG_CODE = reg.REG_CODE";
         }
 
-        $req .= " WHERE 1=1 AND r.ET_CODE != 1"; // Exclure les brouillons
+        $req .= " WHERE 1=1 AND r.ET_CODE = 1"; // Afficher uniquement les rapports clos
 
         // Filtre par secteur
         if ($secteur) {
