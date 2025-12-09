@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Contrôleur pour la gestion des rapports de visite.
+ * Gère l'affichage, la création, la modification et le listing des rapports.
+ */
+
+// Si aucune action n'est définie, l'action par défaut est de voir les rapports
 if (!isset($_REQUEST['action']) || empty($_REQUEST['action'])) {
     $action = "voirrapport";
 } else {
@@ -7,50 +13,71 @@ if (!isset($_REQUEST['action']) || empty($_REQUEST['action'])) {
 }
 
 switch ($action) {
+    /**
+     * Action : voirrapport
+     * Affiche la liste des rapports de visite avec possibilité de filtrage.
+     */
     case 'voirrapport': {
+        // Récupération des filtres depuis le formulaire (POST)
         $dateDebut = isset($_POST['dateDebut']) && !empty($_POST['dateDebut']) ? $_POST['dateDebut'] : null;
         $dateFin = isset($_POST['dateFin']) && !empty($_POST['dateFin']) ? $_POST['dateFin'] : null;
+        
+        // Filtre praticien : on récupère la valeur si elle existe
         $praticienFiltre = isset($_POST['praticienFiltre']) && !empty($_POST['praticienFiltre']) ? $_POST['praticienFiltre'] : null;
+        
+        // Le filtre visiteur n'est plus utilisé ici (géré par région/secteur/id)
         $visiteurFiltre = null;
 
-        // Récupérer les infos de l'utilisateur connecté pour avoir sa région
+        // Récupérer les infos de l'utilisateur connecté pour obtenir sa région et son secteur
         $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
         $regionCode = $infosUtilisateur['reg_code'];
-        $habId = $_SESSION['hab_id'];
+        $habId = $_SESSION['hab_id']; // Niveau d'habilitation
         $secCode = isset($_SESSION['sec_code']) ? $_SESSION['sec_code'] : null;
 
-        // Si Visiteur (1), on force le filtre sur son matricule
+        // Restriction pour les Visiteurs (niveau 1) : ils ne voient que leurs propres rapports
         if ($habId == 1) {
             $visiteurFiltre = $_SESSION['matricule'];
         }
 
-        // Si Responsable (3), on filtre par secteur
+        // Restriction pour les Responsables de Secteur (niveau 3) : filtrage par secteur
         $secteurFiltre = null;
         if ($habId == 3) {
             $secteurFiltre = $secCode;
         }
 
-        // Récupérer les rapports filtrés
+        // Appel au modèle pour récupérer la liste des rapports filtrés
         $result = getAllRapportDeVisite($dateDebut, $dateFin, $praticienFiltre, $regionCode, $visiteurFiltre, $secteurFiltre);
 
-        // Récupérer la liste des praticiens pour le filtre (filtré par région)
+        // Récupérer la liste des praticiens pour alimenter la liste déroulante du filtre
+        // On ne récupère que les praticiens de la région de l'utilisateur
         $praticiens = getPraticiensByRegion($regionCode);
 
 
+        // Inclusion de la vue pour afficher le formulaire de recherche et le tableau de résultats
         include("vues/v_formulaireRapportsDeVisite.php");
         break;
     }
 
+    /**
+     * Action : mesRapportsBrouillon
+     * Affiche la liste des rapports à l'état "Brouillon" pour l'utilisateur connecté.
+     */
     case 'mesRapportsBrouillon': {
         $matricule = $_SESSION['matricule'];
+        // Récupère les rapports non validés/terminés
         $lesRapportsBrouillon = getLesRapportsBrouillon($matricule);
         include("vues/v_rapportsBrouillon.php");
         break;
     }
 
+    /**
+     * Action : afficherrapport
+     * Affiche le détail complet d'un rapport sélectionné.
+     */
     case 'afficherrapport': {
         if (isset($_REQUEST['rapports'])) {
             $rapNum = $_REQUEST['rapports'];
+            // Récupère toutes les infos du rapport par son numéro
             $carac = getAllInformationRapportDeVisiteNum($rapNum);
 
             if ($carac === false) {
@@ -59,6 +86,7 @@ switch ($action) {
                 exit;
             }
 
+            // Gestion des valeurs nulles pour le remplacant
             if (empty($carac[11])) {
                 $carac[11] = '';// numéro remplacant
                 $carac[12] = ''; // nom remplacant
@@ -73,38 +101,54 @@ switch ($action) {
         break;
     }
 
+    /**
+     * Action : saisirrapport
+     * Affiche le formulaire de création d'un nouveau rapport.
+     */
     case 'saisirrapport': {
-        // BLOQUER l'accès pour HAB_id = 3
+        // BLOQUER l'accès pour HAB_id = 3 (Responsable) qui ne saisit pas de rapports
         if (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] == 3) {
             $_SESSION['erreur'] = 'Vous n\'avez pas les droits pour créer un rapport.';
             header('Location: index.php?uc=rapportvisite&action=voirrapport');
             exit;
         }
-        // Pour afficher le formulaire de saisie
+        
+        // Chargement des données nécessaires au formulaire (motifs, médicaments...)
         $motifs = getMotifs();
-        $praticiens = getAllPraticiens();
+        
+        // Récupération de la région de l'utilisateur pour filtrer les praticiens
+        $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
+        $regionCode = $infosUtilisateur['reg_code'];
+        // On ne liste que les praticiens de la région
+        $praticiens = getPraticiensByRegion($regionCode);
+        
         $medicaments = getMedicaments();
 
-        $mode = 'creation'; // Indicateur pour la vue
+        $mode = 'creation'; // Indicateur pour la vue (titre, action du form...)
         include("vues/v_formulaireRapportDeVisite.php");
         break;
     }
 
+    /**
+     * Action : enregistrerrapport
+     * Traite la soumission du formulaire de création.
+     */
     case 'enregistrerrapport': {
         try {
-            // Récupérer les infos du formulaire (sauf matricule)
+            // Récupération des données POST
             $numPraticien = $_POST['praticien'];
             $dateVisite = $_POST['dateVisite'];
             $motif = $_POST['motif'];
             $bilan = $_POST['bilan'];
 
+            // Gestion du motif "Autre"
             $motifAutre = (isset($_POST['motif_autre']) && $motif == 4) ? trim($_POST['motif_autre']) : null;
 
-            // Médocs et remplaçant optionnels
+            // Données optionnelles
             $medoc1 = !empty($_POST['medoc1']) ? $_POST['medoc1'] : null;
             $medoc2 = !empty($_POST['medoc2']) ? $_POST['medoc2'] : null;
             $numRemplacant = !empty($_POST['numRemplacant']) ? $_POST['numRemplacant'] : null;
-            $etat = !empty($_POST['etat']) ? $_POST['etat'] : 0;
+            $etat = !empty($_POST['etat']) ? $_POST['etat'] : 0; // 0 par défaut (brouillon/créé ?)
             $matricule = $_SESSION['matricule'];
 
             // Validation de la longueur du bilan
@@ -114,7 +158,7 @@ switch ($action) {
                 exit;
             }
 
-            // Validation du motif autre
+            // Validation spécifique pour le motif "Autre"
             $motifAutre = null;
             if ($motif == 4) {
                 if (empty($_POST['motif_autre'])) {
@@ -130,7 +174,7 @@ switch ($action) {
                 }
             }
 
-            // Validation du format de date
+            // Validation du format de date (Y-m-d)
             $dateObj = DateTime::createFromFormat('Y-m-d', $dateVisite);
             if (!$dateObj || $dateObj->format('Y-m-d') !== $dateVisite) {
                 $_SESSION['erreur'] = 'Format de date invalide.';
@@ -138,12 +182,12 @@ switch ($action) {
                 exit;
             }
 
-            // Médocs et remplaçant optionnels
+            // Nettoyage et typage final des données optionnelles
             $medoc1 = !empty($_POST['medoc1']) ? trim($_POST['medoc1']) : null;
             $medoc2 = !empty($_POST['medoc2']) ? trim($_POST['medoc2']) : null;
             $numRemplacant = !empty($_POST['numRemplacant']) ? intval($_POST['numRemplacant']) : null;
 
-            // Insertion
+            // Insertion dans la base de données
             $resultat = insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numRemplacant, $etat);
 
             if ($resultat) {
@@ -163,8 +207,13 @@ switch ($action) {
         }
     }
 
+    /**
+     * Action : editerrapport
+     * Affiche le formulaire de modification d'un rapport existant (si brouillon).
+     */
     case 'editerrapport': {
         $rapNum = $_REQUEST['rapports'];
+        // Récupération des données du rapport
         $carac = getAllInformationRapportDeVisiteNum($rapNum);
 
         if ($carac === false) {
@@ -173,15 +222,21 @@ switch ($action) {
             exit;
         }
 
-        // Vérifier si le rapport est bien en état "Nouveau" (1)
+        // Vérifier si le rapport est bien en état "Nouveau" (1) pour autoriser la modif
         if ($carac[17] != 1) {
             $_SESSION['erreur'] = "Ce rapport n'est pas modifiable.";
             header("Location: index.php?uc=rapportvisite&action=voirrapport");
             exit;
         }
 
+        // Chargement des données pour les listes déroulantes
         $motifs = getMotifs();
-        $praticiens = getAllPraticiens();
+        
+        // Récupération de la région pour filtrer les praticiens
+        $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
+        $regionCode = $infosUtilisateur['reg_code'];
+        $praticiens = getPraticiensByRegion($regionCode);
+        
         $medicaments = getMedicaments();
 
         $mode = 'modification'; // Indicateur pour la vue
@@ -189,6 +244,10 @@ switch ($action) {
         break;
     }
 
+    /**
+     * Action : sauvegarderModification
+     * Enregistre les modifications apportées à un rapport.
+     */
     case 'sauvegarderModification': {
         try {
             $rapNum = $_POST['rapNum'];
@@ -215,6 +274,7 @@ switch ($action) {
                 exit;
             }
 
+            // Mise à jour en base de données
             $resultat = updateRapport($rapNum, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numRemplacant, $etat);
 
             if ($resultat) {
