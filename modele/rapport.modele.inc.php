@@ -131,7 +131,7 @@ function getLesRapportsBrouillon($matricule)
         $req = 'SELECT r.RAP_NUM, r.RAP_DATEVISITE, c.COL_NOM, c.COL_PRENOM
                 FROM rapport_visite r
                 LEFT JOIN collaborateur c ON r.COL_MATRICULE = c.COL_MATRICULE
-                WHERE r.COL_MATRICULE = :matricule AND r.ET_CODE = 1
+                WHERE r.COL_MATRICULE = :matricule AND r.ET_CODE = 0
                 ORDER BY r.RAP_NUM';
 
         $res = $monPdo->prepare($req);
@@ -300,17 +300,18 @@ function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAut
         $stmt = $monPdo->prepare($req);
 
         // BIND tous les paramètres
-        $stmt->bindParam(':col_matricule', $matriculeExact, PDO::PARAM_STR);
-        $stmt->bindParam(':rap_num', $rapNum, PDO::PARAM_INT);
-        $stmt->bindParam(':pra_num', $numPraticien, PDO::PARAM_INT);
-        $stmt->bindParam(':rap_datevisite', $dateVisite, PDO::PARAM_STR);
-        $stmt->bindParam(':mo_code', $motif, PDO::PARAM_INT);
-        $stmt->bindParam(':rap_motif_autre', $motifAutre, PDO::PARAM_STR);
-        $stmt->bindParam(':rap_bilan', $bilan, PDO::PARAM_STR);
-        $stmt->bindParam(':medoc1', $medoc1, PDO::PARAM_STR);
-        $stmt->bindParam(':medoc2', $medoc2, PDO::PARAM_STR);
-        $stmt->bindParam(':numRemplacant', $numRemplacant, PDO::PARAM_INT);
-        $stmt->bindParam(':et_code', $etat, PDO::PARAM_INT);
+        // BIND tous les paramètres
+        $stmt->bindValue(':col_matricule', $matriculeExact, PDO::PARAM_STR);
+        $stmt->bindValue(':rap_num', $rapNum, PDO::PARAM_INT);
+        $stmt->bindValue(':pra_num', $numPraticien, PDO::PARAM_INT);
+        $stmt->bindValue(':rap_datevisite', $dateVisite, PDO::PARAM_STR);
+        $stmt->bindValue(':mo_code', $motif, PDO::PARAM_INT);
+        $stmt->bindValue(':rap_motif_autre', $motifAutre, PDO::PARAM_STR);
+        $stmt->bindValue(':rap_bilan', $bilan, PDO::PARAM_STR);
+        $stmt->bindValue(':medoc1', $medoc1, PDO::PARAM_STR);
+        $stmt->bindValue(':medoc2', $medoc2, PDO::PARAM_STR);
+        $stmt->bindValue(':numRemplacant', $numRemplacant, PDO::PARAM_INT);
+        $stmt->bindValue(':et_code', $etat, PDO::PARAM_INT);
 
         // EXÉCUTER la requête INSERT
         $stmt->execute();
@@ -345,14 +346,14 @@ function updateRapport($rapNum, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $
                 WHERE RAP_NUM = :rap_num";
 
         $stmt = $monPdo->prepare($req);
-        $stmt->bindParam(':rap_num', $rapNum, PDO::PARAM_INT);
-        $stmt->bindParam(':mo_code', $motif, PDO::PARAM_INT);
-        $stmt->bindParam(':rap_motif_autre', $motifAutre, PDO::PARAM_STR);
-        $stmt->bindParam(':rap_bilan', $bilan, PDO::PARAM_STR);
-        $stmt->bindParam(':medoc1', $medoc1, PDO::PARAM_STR);
-        $stmt->bindParam(':medoc2', $medoc2, PDO::PARAM_STR);
-        $stmt->bindParam(':numRemplacant', $numRemplacant, PDO::PARAM_INT);
-        $stmt->bindParam(':et_code', $etat, PDO::PARAM_INT);
+        $stmt->bindValue(':rap_num', $rapNum, PDO::PARAM_INT);
+        $stmt->bindValue(':mo_code', $motif, PDO::PARAM_INT);
+        $stmt->bindValue(':rap_motif_autre', $motifAutre, PDO::PARAM_STR);
+        $stmt->bindValue(':rap_bilan', $bilan, PDO::PARAM_STR);
+        $stmt->bindValue(':medoc1', $medoc1, PDO::PARAM_STR);
+        $stmt->bindValue(':medoc2', $medoc2, PDO::PARAM_STR);
+        $stmt->bindValue(':numRemplacant', $numRemplacant, PDO::PARAM_INT);
+        $stmt->bindValue(':et_code', $etat, PDO::PARAM_INT);
 
         $stmt->execute();
         return true;

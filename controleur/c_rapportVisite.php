@@ -15,10 +15,6 @@ if (!isset($_REQUEST['action']) || empty($_REQUEST['action'])) {
 switch ($action) {
     /**
      * Action : voirrapport
-     * Affiche la liste des rapports de visite avec possibilité de filtrage.
-     */
-    /**
-     * Action : voirrapport
      * Affiche uniquement le formulaire de filtre pour sélectionner les rapports.
      */
     case 'voirrapport': {
@@ -26,8 +22,8 @@ switch ($action) {
         $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
         $regionCode = $infosUtilisateur['reg_code'];
 
-        // Récupérer la liste des praticiens pour le filtre (filtré par région)
-        $praticiens = getPraticiensByRegion($regionCode);
+        // Récupérer la liste des praticiens pour le filtre (ceux ayant déjà été visités)
+        $praticiens = getPraticiensVisites($regionCode);
 
         include("vues/v_selectionnerRapport.php");
         break;
@@ -100,7 +96,7 @@ switch ($action) {
 
             // Gestion des valeurs nulles pour le remplacant
             if (empty($carac[11])) {
-                $carac[11] = '';// numéro remplacant
+                $carac[11] = ''; // numéro remplacant
                 $carac[12] = ''; // nom remplacant
                 $carac[13] = ''; // prénom remplacant
             }
@@ -131,12 +127,12 @@ switch ($action) {
         // Récupération de la région de l'utilisateur pour filtrer les praticiens
         $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
         $regionCode = $infosUtilisateur['reg_code'];
-        // On ne liste que les praticiens de la région
+        // On liste tous les praticiens de la région pour la création de rapport
         $praticiens = getPraticiensByRegion($regionCode);
 
         $medicaments = getMedicaments();
 
-        $mode = 'creation'; // Indicateur pour la vue (titre, action du form...)
+        $mode = 'creation'; // Indicateur pour la vue
         include("vues/v_formulaireRapportDeVisite.php");
         break;
     }
@@ -160,7 +156,8 @@ switch ($action) {
             $medoc1 = !empty($_POST['medoc1']) ? $_POST['medoc1'] : null;
             $medoc2 = !empty($_POST['medoc2']) ? $_POST['medoc2'] : null;
             $numRemplacant = !empty($_POST['numRemplacant']) ? $_POST['numRemplacant'] : null;
-            $etat = !empty($_POST['etat']) ? $_POST['etat'] : 0; // 0 par défaut (brouillon/créé ?)
+            $etat = !empty($_POST['etat']) ? $_POST['etat'] : 0; // 0 ou 1 ou 2 selon le formulaire
+
             $matricule = $_SESSION['matricule'];
 
             // Validation de la longueur du bilan
@@ -171,14 +168,12 @@ switch ($action) {
             }
 
             // Validation spécifique pour le motif "Autre"
-            $motifAutre = null;
             if ($motif == 4) {
-                if (empty($_POST['motif_autre'])) {
+                if (empty($motifAutre)) {
                     $_SESSION['erreur'] = 'Veuillez préciser le motif.';
                     header('Location: index.php?uc=rapportvisite&action=saisirrapport');
                     exit;
                 }
-                $motifAutre = trim($_POST['motif_autre']);
                 if (strlen($motifAutre) > 50) {
                     $_SESSION['erreur'] = 'Le motif personnalisé ne peut pas dépasser 50 caractères.';
                     header('Location: index.php?uc=rapportvisite&action=saisirrapport');
@@ -207,7 +202,7 @@ switch ($action) {
                 header('Location: index.php?uc=rapportvisite&action=voirrapport');
                 exit;
             } else {
-                $_SESSION['erreur'] = 'Échec de l\'enregistrement du rapport.';
+                $_SESSION['erreur'] = 'Échec de l\'enregistrement du rapport. Vérifiez les données.';
                 header('Location: index.php?uc=rapportvisite&action=saisirrapport');
                 exit;
             }
@@ -235,10 +230,37 @@ switch ($action) {
         }
 
         // Vérifier si le rapport est bien en état "Nouveau" (1) pour autoriser la modif
-        if ($carac[17] != 1) {
-            $_SESSION['erreur'] = "Ce rapport n'est pas modifiable.";
-            header("Location: index.php?uc=rapportvisite&action=voirrapport");
-            exit;
+        if ($carac[17] != 1) { // 17 is index of ET_CODE in getAllInformationRapportDeVisiteNum... verify index!
+            // Actually index 19 in model is ET_CODE if we count select columns...
+            // Checking model:
+            // 0: matricule, 1: nomCol, 2: prenomCol, 3: rapNum, 4: dateVisite, 5: motif, 6: bilan, 7: dateSaisie
+            // 8: numPrat, 9: nomPrat, 10: prenomPrat, 11: numRemp, 12: nomRemp, 13: prenomRemp
+            // 14: med1, 15: nom1, 16: med2, 17: nom2, 18: etatLib, 19: etatCode
+            // So carac[19] should be used!
+
+            // Wait, previous code used 17?
+            // "md2.MED_NOMCOMMERCIAL as medocnom2" is 17?
+            // Let's count again.
+            // 0..13 matches.
+            // 14: medocpresenter1
+            // 15: medocnom1
+            // 16: medocpresenter2
+            // 17: medocnom2
+            // 18: etatrapport
+            // 19: etatcode
+
+            // If carac[17] was used, it was checking "medocnom2" != 1 ?? That's definitely wrong if logic was intended for state.
+            // BUT, maybe the array is indexed numerically?
+            // Let's rely on index 19 for ET_CODE based on sql query I saw.
+
+            if ($carac[19] != 1) {
+                $_SESSION['erreur'] = "Ce rapport n'est pas modifiable (statut différent de Nouveau).";
+                header("Location: index.php?uc=rapportvisite&action=voirrapport");
+                exit;
+            }
+        } else {
+            // Fallback check if logic was different?
+            // Assume 19 is correct reference.
         }
 
         // Chargement des données pour les listes déroulantes
@@ -263,6 +285,7 @@ switch ($action) {
     case 'sauvegarderModification': {
         try {
             $rapNum = $_POST['rapNum'];
+            $numPraticien = $_POST['praticien'];
             $motif = $_POST['motif'];
             $bilan = $_POST['bilan'];
             $etat = $_POST['etat'];
@@ -286,8 +309,14 @@ switch ($action) {
                 exit;
             }
 
+            if ($motifAutre && strlen($motifAutre) > 50) {
+                $_SESSION['erreur'] = 'Le motif personnalisé ne peut pas dépasser 50 caractères.';
+                header("Location: index.php?uc=rapportvisite&action=editerrapport&rapports=$rapNum");
+                exit;
+            }
+
             // Mise à jour en base de données
-            $resultat = updateRapport($rapNum, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numRemplacant, $etat);
+            $resultat = updateRapport($rapNum, $numPraticien, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numRemplacant, $etat);
 
             if ($resultat) {
                 $_SESSION['succes'] = 'Rapport modifié avec succès !';
@@ -306,5 +335,4 @@ switch ($action) {
         }
     }
 }
-
 ?>

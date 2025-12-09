@@ -15,7 +15,7 @@ $bilanVal = $isModification ? $carac[6] : (isset($_POST['bilan']) ? $_POST['bila
 $medoc1Val = $isModification ? $carac[14] : (isset($_POST['medoc1']) ? $_POST['medoc1'] : '');
 $medoc2Val = $isModification ? $carac[15] : (isset($_POST['medoc2']) ? $_POST['medoc2'] : '');
 $remplacantVal = $isModification ? $carac[11] : (isset($_POST['numRemplacant']) ? $_POST['numRemplacant'] : '');
-$etatVal = $isModification ? 1 : 1; // Par défaut Nouveau
+$etatVal = $isModification ? 0 : 0; // Par défaut Nouveau
 // NOTE: En modification, l'état est souvent géré à part ou fix, ici on laisse par défaut.
 ?>
 
@@ -114,8 +114,8 @@ $etatVal = $isModification ? 1 : 1; // Par défaut Nouveau
 
             <label for="etat">État du rapport <span style="color:red;">*</span> :</label>
             <select name="etat" id="etat" required class="form-select">
-                <option value="1" <?php echo ($etatVal == 1) ? 'selected' : ''; ?>>Nouveau</option>
-                <option value="2" <?php echo ($etatVal == 2) ? 'selected' : ''; ?>>Clos</option>
+                <option value="0" <?php echo ($etatVal == 0) ? 'selected' : ''; ?>>Nouveau</option>
+                <option value="1" <?php echo ($etatVal == 1) ? 'selected' : ''; ?>>Clos</option>
             </select><br><br>
 
             <div class="d-flex justify-content-between">

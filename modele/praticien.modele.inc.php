@@ -4,7 +4,6 @@ include_once 'bd.inc.php';
 
 function getAllNomPraticien()
 {
-
     try {
         $monPdo = connexionPDO();
         $req = 'SELECT PRA_NUM, PRA_PRENOM, PRA_NOM FROM praticien ORDER BY PRA_NOM';
@@ -15,13 +14,10 @@ function getAllNomPraticien()
         print "Erreur !: " . $e->getMessage();
         die();
     }
-
 }
-//,PRA_ADRESSE,PRA_CP, PRA_VILLE,PRA_COEFNOTORIETE,TYP_CODE
 
 function getAllInformationPraticienNum($matricule)
 {
-
     try {
         $monPdo = connexionPDO();
         $req = 'SELECT p.PRA_NUM as \'matriculepraticien\',
@@ -32,7 +28,6 @@ function getAllInformationPraticienNum($matricule)
         p.PRA_VILLE as \'ville\',
         p.PRA_COEFNOTORIETE as \'coefficientdenotoriete\',
         p.PRA_COEFCONFIANCE as \'coefficientdeconfiance\', 
-        
         t.TYP_LIBELLE as \'typedepraticien\'
         FROM praticien p INNER JOIN type_praticien t ON t.TYP_CODE = p.TYP_CODE 
         WHERE p.PRA_NUM = "' . $matricule . '"';
@@ -47,7 +42,6 @@ function getAllInformationPraticienNum($matricule)
 
 function getAllInformationPraticienNom($nom)
 {
-
     try {
         $monPdo = connexionPDO();
         $req = 'SELECT p.PRA_NUM as \'matriculepraticien\',
@@ -58,8 +52,6 @@ function getAllInformationPraticienNom($nom)
         p.PRA_VILLE as \'ville\',
         p.PRA_COEFNOTORIETE as \'coefficientdenotoriete\',
         p.PRA_COEFCONFIANCE as \'coefficientdeconfiance\', 
-        
-
         t.TYP_LIBELLE as \'typedepraticien\'
         FROM praticien p INNER JOIN type_praticien t ON t.TYP_CODE = p.TYP_CODE WHERE p.PRA_NOM = "' . $nom . '"';
         $res = $monPdo->query($req);
@@ -73,7 +65,6 @@ function getAllInformationPraticienNom($nom)
 
 function getPraticien($nom)
 {
-
     try {
         $monPdo = connexionPDO();
         $req = 'SELECT PRA_NUM, PRA_PRENOM, PRA_NOM FROM praticien WHERE PRA_NOM = "' . $nom . '"';
@@ -88,7 +79,6 @@ function getPraticien($nom)
 
 function getNbPraticien()
 {
-
     try {
         $monPdo = connexionPDO();
         $req = 'SELECT COUNT(PRA_NUM) as \'nb\' FROM praticien';
@@ -100,7 +90,6 @@ function getNbPraticien()
         die();
     }
 }
-
 
 function getPraticiensBySecteur($secteur)
 {
@@ -128,6 +117,25 @@ function getPraticiensByRegion($region)
         $req = 'SELECT DISTINCT p.PRA_NUM, p.PRA_PRENOM, p.PRA_NOM 
                 FROM praticien p
                 JOIN departement d ON LEFT(p.PRA_CP, 2) = d.NoDEPT
+                WHERE d.REG_CODE = "' . $region . '"
+                ORDER BY p.PRA_NOM';
+        $res = $monPdo->query($req);
+        $result = $res->fetchAll();
+        return $result;
+    } catch (PDOException $e) {
+        print "Erreur !: " . $e->getMessage();
+        die();
+    }
+}
+
+function getPraticiensVisites($region)
+{
+    try {
+        $monPdo = connexionPDO();
+        $req = 'SELECT DISTINCT p.PRA_NUM, p.PRA_PRENOM, p.PRA_NOM 
+                FROM praticien p
+                JOIN departement d ON LEFT(p.PRA_CP, 2) = d.NoDEPT
+                JOIN rapport_visite rv ON rv.PRA_NUM = p.PRA_NUM
                 WHERE d.REG_CODE = "' . $region . '"
                 ORDER BY p.PRA_NOM';
         $res = $monPdo->query($req);
