@@ -1,4 +1,7 @@
 <?php
+require_once 'modele/praticien.modele.inc.php';
+require_once 'modele/bd.inc.php';
+
 if (!isset($_REQUEST['action']) || empty($_REQUEST['action'])) {
 	$action = "formulaireprat";
 } else {
@@ -10,7 +13,7 @@ switch ($action) {
 		if (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] == 3 && isset($_SESSION['sec_code'])) {
 			$result = getPraticiensBySecteur($_SESSION['sec_code']);
 		} elseif (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] == 2 && isset($_SESSION['reg_code'])) {
-			$result = getPraticiensByRegion($_SESSION['reg_code']);
+			$result = getAllNomPraticien();
 		} else {
 			$result = getAllNomPraticien();
 		}
