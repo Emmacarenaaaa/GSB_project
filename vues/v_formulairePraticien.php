@@ -23,7 +23,7 @@
                         <option value class="text-center">- Choisissez un praticien -</option>
                         <?php
                         foreach ($result as $key) {
-                            echo '<option value="' . $key['PRA_NUM'] . '" class="form-control">' . $key['PRA_NUM'] . ' - ' . $key['PRA_NOM'] . ' - ' . $key['PRA_PRENOM'] . '</option>';
+                            echo '<option value="' . $key['PRA_NUM'] . '" class="form-control">' . $key['PRA_NOM'] . ' - ' . $key['PRA_PRENOM'] . '</option>';
                         }
                         ?>
                     </select>
