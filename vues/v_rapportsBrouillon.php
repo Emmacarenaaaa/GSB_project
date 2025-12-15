@@ -2,7 +2,7 @@
     <div class="structure-hero pt-lg-5 pt-4">
       <h1 class="titre text-center">Mes rapports brouillon</h1>
       <p class="text text-center">
-        Liste de vos rapports en cours de rédaction (état "Nouveau").
+        Liste de vos rapports en cours de rédaction.
       </p>
     </div>
     <div class="row align-items-center justify-content-center">

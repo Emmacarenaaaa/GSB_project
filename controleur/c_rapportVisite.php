@@ -228,52 +228,29 @@ switch ($action) {
             header("Location: index.php?uc=rapportvisite&action=voirrapport");
             exit;
         }
-
+        // Vérification de l'état (ET_CODE)
         // Vérifier si le rapport est bien en état "Nouveau" (1) pour autoriser la modif
-        if ($carac[17] != 1) { // 17 is index of ET_CODE in getAllInformationRapportDeVisiteNum... verify index!
-            // Actually index 19 in model is ET_CODE if we count select columns...
-            // Checking model:
-            // 0: matricule, 1: nomCol, 2: prenomCol, 3: rapNum, 4: dateVisite, 5: motif, 6: bilan, 7: dateSaisie
-            // 8: numPrat, 9: nomPrat, 10: prenomPrat, 11: numRemp, 12: nomRemp, 13: prenomRemp
-            // 14: med1, 15: nom1, 16: med2, 17: nom2, 18: etatLib, 19: etatCode
-            // So carac[19] should be used!
-
-            // Wait, previous code used 17?
-            // "md2.MED_NOMCOMMERCIAL as medocnom2" is 17?
-            // Let's count again.
-            // 0..13 matches.
-            // 14: medocpresenter1
-            // 15: medocnom1
-            // 16: medocpresenter2
-            // 17: medocnom2
-            // 18: etatrapport
-            // 19: etatcode
-
-            // If carac[17] was used, it was checking "medocnom2" != 1 ?? That's definitely wrong if logic was intended for state.
-            // BUT, maybe the array is indexed numerically?
-            // Let's rely on index 19 for ET_CODE based on sql query I saw.
-
-            if ($carac[19] != 1) {
-                $_SESSION['erreur'] = "Ce rapport n'est pas modifiable (statut différent de Nouveau).";
-                header("Location: index.php?uc=rapportvisite&action=voirrapport");
-                exit;
-            }
-        } else {
-            // Fallback check if logic was different?
-            // Assume 19 is correct reference.
+        if ($carac[19] != 0) {
+            $_SESSION['erreur'] = "Ce rapport n'est pas modifiable.";
+            header("Location: index.php?uc=rapportvisite&action=voirrapport");
+            exit;
         }
 
-        // Chargement des données pour les listes déroulantes
+        // Récupération des données du rapport  (retourne les données)
+
         $motifs = getMotifs();
+        $medicaments = getMedicaments();
 
         // Récupération de la région pour filtrer les praticiens
         $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
         $regionCode = $infosUtilisateur['reg_code'];
         $praticiens = getPraticiensByRegion($regionCode);
 
-        $medicaments = getMedicaments();
+        // Le code du visiteur est déjà en session
+
 
         $mode = 'modification'; // Indicateur pour la vue
+
         include("vues/v_formulaireRapportDeVisite.php");
         break;
     }
@@ -284,17 +261,23 @@ switch ($action) {
      */
     case 'sauvegarderModification': {
         try {
-            $rapNum = $_POST['rapNum'];
-            $numPraticien = $_POST['praticien'];
-            $motif = $_POST['motif'];
-            $bilan = $_POST['bilan'];
-            $etat = $_POST['etat'];
+            $rapNum = (int) ($_POST['rapNum'] ?? 0);
+            $numPraticien = (int) ($_POST['praticien'] ?? 0);
+            $motif = (int) ($_POST['motif'] ?? 0);
+            $etat = (int) ($_POST['etat'] ?? 0);
 
-            $motifAutre = (isset($_POST['motif_autre']) && $motif == 4) ? trim($_POST['motif_autre']) : null;
+            // Pour les chaînes de caractères, on applique htmlspecialchars et trim
+            $bilan_raw = $_POST['bilan'] ?? '';
+            $bilan = trim(htmlspecialchars($bilan_raw, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
 
-            $medoc1 = !empty($_POST['medoc1']) ? $_POST['medoc1'] : null;
-            $medoc2 = !empty($_POST['medoc2']) ? $_POST['medoc2'] : null;
-            $numRemplacant = !empty($_POST['numRemplacant']) ? $_POST['numRemplacant'] : null;
+            $motifAutre_raw = $_POST['motif_autre'] ?? '';
+            $motifAutre = ($motif == 4) ? trim(htmlspecialchars($motifAutre_raw, ENT_QUOTES | ENT_HTML5, 'UTF-8')) : null;
+
+            $medoc1 = !empty($_POST['medoc1']) ? htmlspecialchars($_POST['medoc1'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : null;
+            $medoc2 = !empty($_POST['medoc2']) ? htmlspecialchars($_POST['medoc2'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : null;
+
+            // Validation pour numRemplacant qui peut être vide ou null
+            $numRemplacant = !empty($_POST['numRemplacant']) ? (int) $_POST['numRemplacant'] : null;
 
             // Validation (similaire à l'insertion)
             if (strlen($bilan) > 255) {

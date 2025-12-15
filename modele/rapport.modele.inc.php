@@ -60,7 +60,6 @@ function getAllRapportDeVisite($dateDebut = null, $dateFin = null, $praticienFil
             $stmt->bindValue(':secteur', $secteur, PDO::PARAM_STR);
         }
 
-        // Only bind region if we are using it
         if ($region && !$secteur) {
             $stmt->bindValue(':region', $region, PDO::PARAM_STR);
         }
@@ -330,13 +329,12 @@ function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAut
         return false;
     }
 }
-
-function updateRapport($rapNum, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numRemplacant, $etat)
+function updateRapport($rapNum, $numPraticien, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numRemplacant, $etat) // <-- Ajout de $numPraticien ici
 {
     try {
         $monPdo = connexionPDO();
         $req = "UPDATE rapport_visite SET 
-                MO_CODE = :mo_code, 
+                PRA_NUM = :pra_num,             MO_CODE = :mo_code, 
                 RAP_MOTIF_AUTRE = :rap_motif_autre,
                 RAP_BILAN = :rap_bilan, 
                 MED_DEPOTLEGAL_PRESENTER1 = :medoc1, 
@@ -346,19 +344,36 @@ function updateRapport($rapNum, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $
                 WHERE RAP_NUM = :rap_num";
 
         $stmt = $monPdo->prepare($req);
+        
+        // NOUVEAU : Liaison du paramètre Praticien
+        $stmt->bindValue(':pra_num', $numPraticien, PDO::PARAM_INT); 
+
         $stmt->bindValue(':rap_num', $rapNum, PDO::PARAM_INT);
         $stmt->bindValue(':mo_code', $motif, PDO::PARAM_INT);
         $stmt->bindValue(':rap_motif_autre', $motifAutre, PDO::PARAM_STR);
         $stmt->bindValue(':rap_bilan', $bilan, PDO::PARAM_STR);
-        $stmt->bindValue(':medoc1', $medoc1, PDO::PARAM_STR);
-        $stmt->bindValue(':medoc2', $medoc2, PDO::PARAM_STR);
-        $stmt->bindValue(':numRemplacant', $numRemplacant, PDO::PARAM_INT);
+        if ($medoc1 === null) {
+            $stmt->bindValue(':medoc1', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':medoc1', $medoc1, PDO::PARAM_STR);
+        }        
+        if ($medoc2 === null) {
+            $stmt->bindValue(':medoc2', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':medoc2', $medoc2, PDO::PARAM_STR);
+        }
+        if ($numRemplacant === null) {
+            $stmt->bindValue(':numRemplacant', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':numRemplacant', $numRemplacant, PDO::PARAM_INT);
+        }
         $stmt->bindValue(':et_code', $etat, PDO::PARAM_INT);
 
         $stmt->execute();
         return true;
     } catch (PDOException $e) {
-        error_log("Erreur updateRapport : " . $e->getMessage());
+        // L'utilisation d'error_log est bonne, mais le code du contrôleur doit afficher $e->getMessage() pour le débogage.
+        error_log("Erreur updateRapport : " . $e->getMessage()); 
         return false;
     }
 }

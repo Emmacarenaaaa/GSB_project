@@ -16,7 +16,6 @@ $medoc1Val = $isModification ? $carac[14] : (isset($_POST['medoc1']) ? $_POST['m
 $medoc2Val = $isModification ? $carac[15] : (isset($_POST['medoc2']) ? $_POST['medoc2'] : '');
 $remplacantVal = $isModification ? $carac[11] : (isset($_POST['numRemplacant']) ? $_POST['numRemplacant'] : '');
 $etatVal = $isModification ? 0 : 0; // Par défaut Nouveau
-// NOTE: En modification, l'état est souvent géré à part ou fix, ici on laisse par défaut.
 ?>
 
 <div class="row align-items-center justify-content-center">
@@ -30,8 +29,9 @@ $etatVal = $isModification ? 0 : 0; // Par défaut Nouveau
             <?php endif; ?>
 
             <label for="praticien">Praticien <span style="color:red;">*</span> :</label>
-            <select name="praticien" id="praticien" required class="form-select" <?php echo $isModification ? 'disabled' : ''; // Peut-être disabled en modif ? ?>>
+            <select name="praticien" id="praticien" required class="form-select">
                 <option value="">-- Sélectionner --</option>
+
                 <?php foreach ($praticiens as $praticien) {
                     $selected = ($praticien['PRA_NUM'] == $praNumVal) ? 'selected' : '';
                     $label = $praticien['PRA_NOM'] . ' ' . $praticien['PRA_PRENOM'];

@@ -9,7 +9,7 @@ if (!isset($_REQUEST['action']) || empty($_REQUEST['action'])) {
 }
 switch ($action) {
 	case 'formulaireprat': {
-		// Apply filtering for this view as well
+		// ce qu'on affiche dans "praticiens" 
 		if (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] == 3 && isset($_SESSION['sec_code'])) {
 			$result = getPraticiensBySecteur($_SESSION['sec_code']);
 		} elseif (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] == 2 && isset($_SESSION['reg_code'])) {
@@ -20,7 +20,7 @@ switch ($action) {
 		include("vues/v_formulairePraticien.php");
 		break;
 	}
-
+	// ce qui est affiché lors de la séléction du praticien (consulter)
 	case 'afficherprat': {
 		$monPdo = connexionPDO();
 		$prat = isset($_REQUEST['praticien']) ? $_REQUEST['praticien'] : (isset($_REQUEST['praticien_select']) ? $_REQUEST['praticien_select'] : null);
@@ -29,13 +29,13 @@ switch ($action) {
 			if (empty($carac[9])) {
 				$carac[9] = 'Non défini(e)';
 			}
-            
-            // Récupérer les spécialités pour l'affichage
-            $reqSpe = 'SELECT s.SPE_LIBELLE FROM specialite s 
+
+			// Récupérer les spécialités pour l'affichage
+			$reqSpe = 'SELECT s.SPE_LIBELLE FROM specialite s 
                        INNER JOIN posseder p ON p.SPE_CODE = s.SPE_CODE 
                        WHERE p.PRA_NUM = ' . $prat;
-            $resSpe = $monPdo->query($reqSpe);
-            $specialites_affichage = $resSpe->fetchAll(PDO::FETCH_COLUMN);
+			$resSpe = $monPdo->query($reqSpe);
+			$specialites_affichage = $resSpe->fetchAll(PDO::FETCH_COLUMN);
 
 			include("vues/v_afficherPraticien.php");
 		} else {
@@ -76,17 +76,13 @@ switch ($action) {
 		$reqTypes = 'SELECT TYP_CODE, TYP_LIBELLE FROM type_praticien ORDER BY TYP_LIBELLE';
 		$resTypes = $monPdo->query($reqTypes);
 		$types = $resTypes->fetchAll();
-
 		$reqSpecialites = 'SELECT SPE_CODE, SPE_LIBELLE FROM specialite ORDER BY SPE_LIBELLE';
 		$resSpecialites = $monPdo->query($reqSpecialites);
 		$specialites = $resSpecialites->fetchAll();
-
-		// ===== GESTION DES MODES =====
-
-		// Use a dedicated POST key for internal form actions so it doesn't override the controller's top-level action
+		//permet de ne pas remplacer l'action au niveau du controleur (clé post pour les actions internes)
 		$formAction = isset($_POST['form_action']) ? $_POST['form_action'] : null;
 
-		// MODE LISTE : affichage de la liste de sélection (par défaut)
+		//  affichage de la liste de sélection 
 		if ($formAction === null || $formAction == 'liste') {
 			$mode = 'liste';
 		}
@@ -158,9 +154,19 @@ switch ($action) {
 						$num = $rowMax['max_num'] + 1;
 
 						$reqInsert = 'INSERT INTO praticien (PRA_NUM, PRA_NOM, PRA_PRENOM, PRA_ADRESSE, PRA_CP, PRA_VILLE, PRA_COEFNOTORIETE, PRA_COEFCONFIANCE, TYP_CODE) 
-										 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+             VALUES (:num, :nom, :prenom, :adresse, :cp, :ville, :notoriete, :confiance, :type)';
 						$resInsert = $monPdo->prepare($reqInsert);
-						$resInsert->execute(array($num, $nom, $prenom, $adresse, $cp, $ville, $notoriete, $confiance, $type));
+						$resInsert->bindParam(':num', $num, PDO::PARAM_INT);
+						$resInsert->bindParam(':nom', $nom, PDO::PARAM_STR);
+						$resInsert->bindParam(':prenom', $prenom, PDO::PARAM_STR);
+						$resInsert->bindParam(':adresse', $adresse, PDO::PARAM_STR);
+						$resInsert->bindParam(':cp', $cp, PDO::PARAM_STR);
+						$resInsert->bindParam(':ville', $ville, PDO::PARAM_STR);
+						$resInsert->bindParam(':notoriete', $notoriete, PDO::PARAM_INT);
+						$resInsert->bindParam(':confiance', $confiance, PDO::PARAM_INT);
+						$resInsert->bindParam(':type', $type, PDO::PARAM_STR);
+						$resInsert->execute();
+
 						$message = "Praticien créé avec succès !";
 					} else {
 						// Modifier un praticien existant
