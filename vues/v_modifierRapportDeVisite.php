@@ -22,16 +22,6 @@
  <select name="motif" id="motif" required class="form-select" onchange="toggleMotifAutre()">
   <option value="">-- Sélectionner --</option>
   <?php foreach($motifs as $motif) {
-   // Pré-sélection du motif
-   // Attention : $carac[5] contient le LIBELLE du motif, pas le code. 
-   // Il faudrait idéalement récupérer le code du motif dans la requête SQL.
-   // Pour l'instant, on va essayer de faire correspondre avec le libellé ou gérer le cas "Autre"
-   
-   // Amélioration : On suppose que l'utilisateur doit resélectionner si ce n'est pas clair, 
-   // MAIS pour faire propre, il faudrait que getAllInformationRapportDeVisiteNum retourne aussi le code motif.
-   // On va modifier le modèle pour retourner MO_CODE aussi.
-   
-   // En attendant, on affiche la liste.
    $selected = '';
    // Si le libellé correspond
    if ($motif['MO_LIBELLE'] == $carac[5]) {

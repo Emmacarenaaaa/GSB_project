@@ -143,38 +143,87 @@ switch ($action) {
      */
     case 'enregistrerrapport': {
         try {
-            // Récupération des données POST
-            $numPraticien = $_POST['praticien'];
-            $dateVisite = $_POST['dateVisite'];
-            $motif = $_POST['motif'];
-            $bilan = $_POST['bilan'];
+            // --- 1. Récupération et Assainissement des données POST ---
 
-            // Gestion du motif "Autre"
-            $motifAutre = (isset($_POST['motif_autre']) && $motif == 4) ? trim($_POST['motif_autre']) : null;
+            // Données principales (conversion numérique)
+            $numPraticien = (int) ($_POST['praticien'] ?? 0);
+            $motif = (int) ($_POST['motif'] ?? 0);
+            $etat = (int) ($_POST['etat'] ?? 0); // État par défaut 0 (Nouveau) si non fourni
+
+            // Données textuelles (assainissement HTML)
+            $bilan_raw = $_POST['bilan'] ?? '';
+            $bilan = trim(htmlspecialchars($bilan_raw, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+
+            $motifAutre_raw = $_POST['motif_autre'] ?? '';
+            $motifAutre = ($motif == 4) ? trim(htmlspecialchars($motifAutre_raw, ENT_QUOTES | ENT_HTML5, 'UTF-8')) : null;
 
             // Données optionnelles
-            $medoc1 = !empty($_POST['medoc1']) ? $_POST['medoc1'] : null;
-            $medoc2 = !empty($_POST['medoc2']) ? $_POST['medoc2'] : null;
-            $numRemplacant = !empty($_POST['numRemplacant']) ? $_POST['numRemplacant'] : null;
-            $etat = !empty($_POST['etat']) ? $_POST['etat'] : 0; // 0 ou 1 ou 2 selon le formulaire
+            $dateVisite = $_POST['dateVisite'] ?? null; // Validation de la date plus bas
+            $medoc1 = !empty($_POST['medoc1']) ? htmlspecialchars($_POST['medoc1'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : null;
+            $medoc2 = !empty($_POST['medoc2']) ? htmlspecialchars($_POST['medoc2'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : null;
+            $numRemplacant = !empty($_POST['numRemplacant']) ? (int) $_POST['numRemplacant'] : null;
 
             $matricule = $_SESSION['matricule'];
 
-            // Validation de la longueur du bilan
-            if (strlen($bilan) > 255) {
+            // --- 2. RÉCUPÉRATION ET VALIDATION DES ÉCHANTILLONS ---
+
+            $echantillonsOfferts = [];
+            $maxEchantillons = 10;
+
+            for ($i = 1; $i <= $maxEchantillons; $i++) {
+                $medoc_key = "echantillon_medoc_{$i}";
+                $qte_key = "echantillon_qte_{$i}";
+
+                $medoc_id_raw = $_POST[$medoc_key] ?? null;
+                $quantite = (int) ($_POST[$qte_key] ?? 0);
+
+                if (empty($medoc_id_raw)) {
+                    if ($i > 1 && count($echantillonsOfferts) > 0) {
+                        break;
+                    }
+                    continue;
+                }
+
+                // Assainissement final
+                $medoc_id_safe = htmlspecialchars($medoc_id_raw, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+                // Validation : La quantité doit être > 0 si le produit est sélectionné
+                if ($quantite <= 0) {
+                    $_SESSION['erreur'] = 'Veuillez spécifier une quantité positive pour l\'échantillon ' . $i . '.';
+                    header('Location: index.php?uc=rapportvisite&action=saisirrapport');
+                    exit;
+                }
+
+                $echantillonsOfferts[] = [
+                    'medoc_id' => $medoc_id_safe,
+                    'quantite' => $quantite
+                ];
+            }
+
+            // --- 3. Validation des Données Principales ---
+
+            // Validation de l'ID Praticien
+            if ($numPraticien <= 0) {
+                $_SESSION['erreur'] = 'Veuillez sélectionner un praticien valide.';
+                header('Location: index.php?uc=rapportvisite&action=saisirrapport');
+                exit;
+            }
+
+            // Validation de la longueur (avec mb_strlen pour l'UTF-8)
+            if (mb_strlen($bilan) > 255) {
                 $_SESSION['erreur'] = 'Le bilan ne peut pas dépasser 255 caractères.';
                 header('Location: index.php?uc=rapportvisite&action=saisirrapport');
                 exit;
             }
 
-            // Validation spécifique pour le motif "Autre"
+            // Validation spécifique pour le motif "Autre" (avec mb_strlen)
             if ($motif == 4) {
                 if (empty($motifAutre)) {
                     $_SESSION['erreur'] = 'Veuillez préciser le motif.';
                     header('Location: index.php?uc=rapportvisite&action=saisirrapport');
                     exit;
                 }
-                if (strlen($motifAutre) > 50) {
+                if (mb_strlen($motifAutre) > 50) {
                     $_SESSION['erreur'] = 'Le motif personnalisé ne peut pas dépasser 50 caractères.';
                     header('Location: index.php?uc=rapportvisite&action=saisirrapport');
                     exit;
@@ -189,13 +238,22 @@ switch ($action) {
                 exit;
             }
 
-            // Nettoyage et typage final des données optionnelles
-            $medoc1 = !empty($_POST['medoc1']) ? trim($_POST['medoc1']) : null;
-            $medoc2 = !empty($_POST['medoc2']) ? trim($_POST['medoc2']) : null;
-            $numRemplacant = !empty($_POST['numRemplacant']) ? intval($_POST['numRemplacant']) : null;
+            // --- 4. Insertion dans la base de données ---
+            // La fonction insertRapport doit maintenant accepter un 11ème argument: $echantillonsOfferts
 
-            // Insertion dans la base de données
-            $resultat = insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numRemplacant, $etat);
+            $resultat = insertRapport(
+                $matricule,
+                $numPraticien,
+                $dateVisite,
+                $motif,
+                $motifAutre,
+                $bilan,
+                $medoc1,
+                $medoc2,
+                $numRemplacant,
+                $etat,
+                $echantillonsOfferts // NOUVEAU ARGUMENT
+            );
 
             if ($resultat) {
                 $_SESSION['succes'] = 'Rapport bien enregistré !';
@@ -255,18 +313,22 @@ switch ($action) {
         break;
     }
 
-    /**
-     * Action : sauvegarderModification
-     * Enregistre les modifications apportées à un rapport.
-     */
     case 'sauvegarderModification': {
         try {
             $rapNum = (int) ($_POST['rapNum'] ?? 0);
+
+            // VÉRIFICATION CRITIQUE : L'ID du rapport doit être valide
+            if ($rapNum <= 0) {
+                $_SESSION['erreur'] = 'Erreur critique : Identifiant du rapport manquant ou invalide.';
+                header("Location: index.php?uc=rapportvisite&action=voirrapport");
+                exit;
+            }
+
             $numPraticien = (int) ($_POST['praticien'] ?? 0);
             $motif = (int) ($_POST['motif'] ?? 0);
             $etat = (int) ($_POST['etat'] ?? 0);
 
-            // Pour les chaînes de caractères, on applique htmlspecialchars et trim
+            // Assainissement des chaînes
             $bilan_raw = $_POST['bilan'] ?? '';
             $bilan = trim(htmlspecialchars($bilan_raw, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
 
@@ -276,11 +338,12 @@ switch ($action) {
             $medoc1 = !empty($_POST['medoc1']) ? htmlspecialchars($_POST['medoc1'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : null;
             $medoc2 = !empty($_POST['medoc2']) ? htmlspecialchars($_POST['medoc2'], ENT_QUOTES | ENT_HTML5, 'UTF-8') : null;
 
-            // Validation pour numRemplacant qui peut être vide ou null
             $numRemplacant = !empty($_POST['numRemplacant']) ? (int) $_POST['numRemplacant'] : null;
 
-            // Validation (similaire à l'insertion)
-            if (strlen($bilan) > 255) {
+            // --- 1. VÉRIFICATION DE LA LOGIQUE MÉTIER ---
+
+            // Utilisation de mb_strlen pour les caractères UTF-8
+            if (mb_strlen($bilan) > 255) {
                 $_SESSION['erreur'] = 'Le bilan ne peut pas dépasser 255 caractères.';
                 header("Location: index.php?uc=rapportvisite&action=editerrapport&rapports=$rapNum");
                 exit;
@@ -292,25 +355,76 @@ switch ($action) {
                 exit;
             }
 
-            if ($motifAutre && strlen($motifAutre) > 50) {
+            if ($motifAutre && mb_strlen($motifAutre) > 50) {
                 $_SESSION['erreur'] = 'Le motif personnalisé ne peut pas dépasser 50 caractères.';
                 header("Location: index.php?uc=rapportvisite&action=editerrapport&rapports=$rapNum");
                 exit;
             }
 
-            // Mise à jour en base de données
-            $resultat = updateRapport($rapNum, $numPraticien, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numRemplacant, $etat);
+            // --- 2. RÉCUPÉRATION ET VALIDATION DES ÉCHANTILLONS ---
+
+            $echantillonsOfferts = [];
+            $maxEchantillons = 10;
+
+            for ($i = 1; $i <= $maxEchantillons; $i++) {
+                $medoc_key = "echantillon_medoc_{$i}";
+                $qte_key = "echantillon_qte_{$i}";
+
+                // Récupérer les valeurs (null si non envoyées)
+                $medoc_id_raw = $_POST[$medoc_key] ?? null;
+                $quantite = (int) ($_POST[$qte_key] ?? 0);
+
+                // Si le médicament est vide, on s'arrête (car les champs sont séquentiels)
+                if (empty($medoc_id_raw)) {
+                    // On s'arrête seulement si on a déjà traité au moins une ligne valide
+                    if ($i > 1 && count($echantillonsOfferts) > 0) {
+                        break;
+                    }
+                    // Si c'est la première ligne et qu'elle est vide, on continue pour voir si la 2ème est remplie (au cas où)
+                    continue;
+                }
+
+                // Validation : La quantité doit être > 0 si le produit est sélectionné
+                if ($quantite <= 0) {
+                    $_SESSION['erreur'] = 'Veuillez spécifier une quantité positive pour l\'échantillon ' . $i . ' (' . $medoc_id_raw . ').';
+                    header("Location: index.php?uc=rapportvisite&action=editerrapport&rapports=$rapNum");
+                    exit;
+                }
+
+                // Assainissement final et stockage
+                $medoc_id_safe = htmlspecialchars($medoc_id_raw, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+                $echantillonsOfferts[] = [
+                    'medoc_id' => $medoc_id_safe,
+                    'quantite' => $quantite
+                ];
+            }
+
+            // --- 3. MISE À JOUR EN BASE DE DONNÉES ---
+
+            // Assurez-vous que votre fonction updateRapport a bien 10 arguments !
+            $resultat = updateRapport(
+                $rapNum,
+                $numPraticien,
+                $motif,
+                $motifAutre,
+                $bilan,
+                $medoc1,
+                $medoc2,
+                $numRemplacant,
+                $etat,
+                $echantillonsOfferts // 10ème argument
+            );
 
             if ($resultat) {
                 $_SESSION['succes'] = 'Rapport modifié avec succès !';
                 header('Location: index.php?uc=rapportvisite&action=mesRapportsBrouillon');
                 exit;
             } else {
-                $_SESSION['erreur'] = 'Erreur lors de la modification.';
+                $_SESSION['erreur'] = 'Erreur lors de la modification (Échec de la BDD).';
                 header("Location: index.php?uc=rapportvisite&action=editerrapport&rapports=$rapNum");
                 exit;
             }
-
         } catch (Exception $e) {
             $_SESSION['erreur'] = 'Erreur : ' . $e->getMessage();
             header("Location: index.php?uc=rapportvisite&action=editerrapport&rapports=$rapNum");

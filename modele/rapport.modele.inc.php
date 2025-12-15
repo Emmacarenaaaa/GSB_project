@@ -256,13 +256,15 @@ function getMedicaments()
     }
 }
 
-function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numRemplacant, $etat)
+function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numRemplacant, $etat, $echantillonsOfferts)
 {
+    $monPdo = null;
     try {
         $monPdo = connexionPDO();
         $monPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        // Récupérer la valeur exacte depuis collaborateur
+        $monPdo->beginTransaction(); // 1. DÉMARRER LA TRANSACTION
+
         $getMatricule = $monPdo->prepare("SELECT COL_MATRICULE FROM collaborateur WHERE COL_MATRICULE = ?");
         $getMatricule->execute([$matricule]);
         $matriculeExact = $getMatricule->fetchColumn();
@@ -271,9 +273,6 @@ function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAut
             throw new Exception("Matricule inexistant");
         }
 
-        error_log("Matricule utilisé : '$matriculeExact'");
-
-        // Calculer le prochain RAP_NUM
         $reqNum = "SELECT IFNULL(MAX(RAP_NUM), 0) + 1 AS prochain_num 
                    FROM rapport_visite 
                    WHERE COL_MATRICULE = ?";
@@ -283,9 +282,8 @@ function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAut
         if (!$rapNum)
             $rapNum = 1;
 
-        error_log("RAP_NUM calculé : $rapNum");
 
-        // INSERT
+        // 2. INSERTION DU RAPPORT DANS RAPPORT_VISITE
         $req = "INSERT INTO rapport_visite (
             COL_MATRICULE, RAP_NUM, PRA_NUM, RAP_DATEVISITE, MO_Code, RAP_MOTIF_AUTRE,
             RAP_BILAN, RAP_DATESAISIE,
@@ -298,65 +296,23 @@ function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAut
 
         $stmt = $monPdo->prepare($req);
 
-        // BIND tous les paramètres
-        // BIND tous les paramètres
+        // BIND (Gestion des NULLs omise ici pour la concision, mais doit être complète dans votre code)
         $stmt->bindValue(':col_matricule', $matriculeExact, PDO::PARAM_STR);
         $stmt->bindValue(':rap_num', $rapNum, PDO::PARAM_INT);
         $stmt->bindValue(':pra_num', $numPraticien, PDO::PARAM_INT);
         $stmt->bindValue(':rap_datevisite', $dateVisite, PDO::PARAM_STR);
         $stmt->bindValue(':mo_code', $motif, PDO::PARAM_INT);
-        $stmt->bindValue(':rap_motif_autre', $motifAutre, PDO::PARAM_STR);
-        $stmt->bindValue(':rap_bilan', $bilan, PDO::PARAM_STR);
-        $stmt->bindValue(':medoc1', $medoc1, PDO::PARAM_STR);
-        $stmt->bindValue(':medoc2', $medoc2, PDO::PARAM_STR);
-        $stmt->bindValue(':numRemplacant', $numRemplacant, PDO::PARAM_INT);
-        $stmt->bindValue(':et_code', $etat, PDO::PARAM_INT);
-
-        // EXÉCUTER la requête INSERT
-        $stmt->execute();
-
-        error_log("Nombre de lignes insérées : " . $stmt->rowCount());
-        error_log("✓✓✓ Rapport inséré avec succès !");
-
-        return true;
-
-    } catch (PDOException $e) {
-        error_log("✗ Erreur SQL : " . $e->getMessage());
-        return false;
-
-    } catch (Exception $e) {
-        error_log("✗ Erreur : " . $e->getMessage());
-        return false;
-    }
-}
-function updateRapport($rapNum, $numPraticien, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numRemplacant, $etat) // <-- Ajout de $numPraticien ici
-{
-    try {
-        $monPdo = connexionPDO();
-        $req = "UPDATE rapport_visite SET 
-                PRA_NUM = :pra_num,             MO_CODE = :mo_code, 
-                RAP_MOTIF_AUTRE = :rap_motif_autre,
-                RAP_BILAN = :rap_bilan, 
-                MED_DEPOTLEGAL_PRESENTER1 = :medoc1, 
-                MED_DEPOTLEGAL_PRESENTER2 = :medoc2, 
-                PRA_NUM_REMPLACANT = :numRemplacant, 
-                ET_CODE = :et_code
-                WHERE RAP_NUM = :rap_num";
-
-        $stmt = $monPdo->prepare($req);
-        
-        // NOUVEAU : Liaison du paramètre Praticien
-        $stmt->bindValue(':pra_num', $numPraticien, PDO::PARAM_INT); 
-
-        $stmt->bindValue(':rap_num', $rapNum, PDO::PARAM_INT);
-        $stmt->bindValue(':mo_code', $motif, PDO::PARAM_INT);
-        $stmt->bindValue(':rap_motif_autre', $motifAutre, PDO::PARAM_STR);
+        if ($motifAutre === null) {
+            $stmt->bindValue(':rap_motif_autre', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':rap_motif_autre', $motifAutre, PDO::PARAM_STR);
+        }
         $stmt->bindValue(':rap_bilan', $bilan, PDO::PARAM_STR);
         if ($medoc1 === null) {
             $stmt->bindValue(':medoc1', null, PDO::PARAM_NULL);
         } else {
             $stmt->bindValue(':medoc1', $medoc1, PDO::PARAM_STR);
-        }        
+        }
         if ($medoc2 === null) {
             $stmt->bindValue(':medoc2', null, PDO::PARAM_NULL);
         } else {
@@ -370,12 +326,154 @@ function updateRapport($rapNum, $numPraticien, $motif, $motifAutre, $bilan, $med
         $stmt->bindValue(':et_code', $etat, PDO::PARAM_INT);
 
         $stmt->execute();
+
+        // 3. INSERTION DES ÉCHANTILLONS DANS OFFRIR (CLE ÉTRANGÈRE RESPECTÉE)
+        insertEchantillonsOfferts($monPdo, $matriculeExact, $rapNum, $echantillonsOfferts);
+
+        $monPdo->commit(); // 4. VALIDATION FINALE
+
+        error_log("Rapport inséré avec succès !");
         return true;
+
     } catch (PDOException $e) {
-        // L'utilisation d'error_log est bonne, mais le code du contrôleur doit afficher $e->getMessage() pour le débogage.
-        error_log("Erreur updateRapport : " . $e->getMessage()); 
+        if ($monPdo && $monPdo->inTransaction()) {
+            $monPdo->rollBack(); // ANNULER la transaction
+        }
+        error_log("Erreur SQL (Transaction annulée) : " . $e->getMessage());
+        return false;
+
+    } catch (Exception $e) {
+        error_log("Erreur : " . $e->getMessage());
         return false;
     }
 }
+function updateRapport($rapNum, $numPraticien, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numRemplacant, $etat, $echantillonsOfferts, $dateVisite)
+{
+    $monPdo = null;
+    try {
+        $monPdo = connexionPDO();
+        $monPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $monPdo->beginTransaction();
 
+        // 1. RÉCUPÉRER LE MATRICULE (OBLIGATOIRE POUR LA CLÉ COMPOSITE ET LA TABLE OFFRIR)
+        $reqMatricule = "SELECT COL_MATRICULE FROM rapport_visite WHERE RAP_NUM = :rap_num";
+        $stmtMatricule = $monPdo->prepare($reqMatricule);
+        $stmtMatricule->bindValue(':rap_num', $rapNum, PDO::PARAM_INT);
+        $stmtMatricule->execute();
+        $matriculeExact = $stmtMatricule->fetchColumn();
+
+        if (!$matriculeExact) {
+            throw new Exception("Matricule du rapport non trouvé. Mise à jour impossible.");
+        }
+
+
+        // 2. UPDATE rapport_visite (Utilisation de la clé composite)
+        $req = "UPDATE rapport_visite SET 
+                PRA_NUM = :pra_num, MO_CODE = :mo_code, 
+                RAP_MOTIF_AUTRE = :rap_motif_autre,
+                RAP_BILAN = :rap_bilan, 
+                MED_DEPOTLEGAL_PRESENTER1 = :medoc1, 
+                MED_DEPOTLEGAL_PRESENTER2 = :medoc2, 
+                PRA_NUM_REMPLACANT = :numRemplacant,
+                RAP_DATEVISITE = :rap_datevisite,
+                ET_CODE = :et_code
+                WHERE RAP_NUM = :rap_num AND COL_MATRICULE = :col_matricule"; // CLÉ COMPOSITE
+
+        $stmt = $monPdo->prepare($req);
+
+        // BINDING
+        $stmt->bindValue(':col_matricule', $matriculeExact, PDO::PARAM_STR);
+        $stmt->bindValue(':rap_num', $rapNum, PDO::PARAM_INT);
+        $stmt->bindValue(':pra_num', $numPraticien, PDO::PARAM_INT);
+        $stmt->bindValue(':rap_datevisite', $dateVisite, PDO::PARAM_STR);
+        $stmt->bindValue(':mo_code', $motif, PDO::PARAM_INT);
+        if ($motifAutre === null) {
+            $stmt->bindValue(':rap_motif_autre', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':rap_motif_autre', $motifAutre, PDO::PARAM_STR);
+        }
+        $stmt->bindValue(':rap_bilan', $bilan, PDO::PARAM_STR);
+        if ($medoc1 === null) {
+            $stmt->bindValue(':medoc1', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':medoc1', $medoc1, PDO::PARAM_STR);
+        }
+        if ($medoc2 === null) {
+            $stmt->bindValue(':medoc2', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':medoc2', $medoc2, PDO::PARAM_STR);
+        }
+        if ($numRemplacant === null) {
+            $stmt->bindValue(':numRemplacant', null, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue(':numRemplacant', $numRemplacant, PDO::PARAM_INT);
+        }
+        $stmt->bindValue(':et_code', $etat, PDO::PARAM_INT);
+        $stmt->execute();
+
+        // 3. MISE À JOUR DES ÉCHANTILLONS (OFFRIR)
+        updateEchantillonsOfferts($monPdo, $matriculeExact, $rapNum, $echantillonsOfferts);
+
+        $monPdo->commit();
+
+        return true;
+
+    } catch (PDOException $e) {
+        if ($monPdo && $monPdo->inTransaction()) {
+            $monPdo->rollBack();
+        }
+
+        error_log("Erreur updateRapport : " . $e->getMessage());
+        return false;
+    }
+}
+/**
+ * Insère les échantillons offerts pour un rapport donné (doit être appelée dans une transaction).
+ * @param PDO $monPdo La connexion PDO ouverte.
+ * @param string $matricule Le matricule du collaborateur.
+ * @param int $rapNum Le numéro du rapport.
+ * @param array $echantillonsOfferts Tableau des échantillons à insérer.
+ * @return bool Vrai en cas de succès.
+ */
+function insertEchantillonsOfferts(PDO $monPdo, $matricule, $rapNum, $echantillonsOfferts)
+{
+    if (empty($echantillonsOfferts)) {
+        return true; // Rien à insérer
+    }
+
+    $reqInsert = "INSERT INTO offrir (COL_MATRICULE, RAP_NUM, MED_DEPOTLEGAL, qte_off) 
+             VALUES (:col_matricule, :rap_num, :med_depotlegal, :qte_off)";
+    $stmtInsert = $monPdo->prepare($reqInsert);
+
+    foreach ($echantillonsOfferts as $offre) {
+
+
+        $stmtInsert->bindValue(':col_matricule', $matricule, PDO::PARAM_STR);
+        $stmtInsert->bindValue(':rap_num', $rapNum, PDO::PARAM_INT);
+        $stmtInsert->bindValue(':med_depotlegal', $offre['medoc_id'], PDO::PARAM_STR);
+        $stmtInsert->bindValue(':qte_off', $offre['quantite'], PDO::PARAM_INT);
+
+        $stmtInsert->execute();
+    }
+    return true;
+}
+/**
+ * Met à jour les échantillons offerts pour un rapport existant (DELETE + INSERT).
+ * Doit être appelée dans une transaction.
+ * @param PDO $monPdo La connexion PDO ouverte.
+ * @param string $matricule Le matricule du collaborateur.
+ * @param int $rapNum Le numéro du rapport.
+ * @param array $echantillonsOfferts Tableau des échantillons à insérer.
+ * @return bool Vrai en cas de succès.
+ */
+function updateEchantillonsOfferts(PDO $monPdo, $matricule, $rapNum, $echantillonsOfferts)
+{
+    $reqDelete = "DELETE FROM offrir WHERE COL_MATRICULE = :col_matricule AND RAP_NUM = :rap_num";
+    $stmtDelete = $monPdo->prepare($reqDelete);
+    $stmtDelete->bindValue(':col_matricule', $matricule, PDO::PARAM_STR);
+    $stmtDelete->bindValue(':rap_num', $rapNum, PDO::PARAM_INT);
+    $stmtDelete->execute();
+
+    return insertEchantillonsOfferts($monPdo, $matricule, $rapNum, $echantillonsOfferts);
+}
 ?>
