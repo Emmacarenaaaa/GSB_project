@@ -395,6 +395,8 @@ switch ($action) {
                 $medoc_id_safe = htmlspecialchars($medoc_id_raw, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
                 $echantillonsOfferts[] = [
+                    // La valeur 'medoc_id' est garantie non-vide ici,
+                    // car les entrées vides sont ignorées ou causent une sortie anticipée.
                     'medoc_id' => $medoc_id_safe,
                     'quantite' => $quantite
                 ];

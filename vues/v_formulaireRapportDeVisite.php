@@ -143,6 +143,13 @@ $remplacantVal = $isModification ? $carac[11] : (isset($_POST['numRemplacant']) 
                 </button>
                 <div class="form-text">Max 10 produits différents</div>
             </div>
+            <div id="etat-container">
+            <label for="etat">État du rapport <span style="color:red;">*</span> :</label>
+            <select name="etat" id="etat" required class="form-select">
+                <option value="1" selected>Brouillon</option>
+                <option value="2">Clos</option>
+            </select><br><br>
+            </div>
 
             <!-- Bouton Submit -->
             <div class="d-grid">
