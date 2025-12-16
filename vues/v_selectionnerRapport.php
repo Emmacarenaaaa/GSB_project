@@ -24,7 +24,7 @@
             <form id="formFiltre" action="index.php?uc=rapportvisite&action=validerSelection" method="post"
                 class="formulaire-recherche col-12 m-0 mb-4 p-3 border rounded">
                 <h5 class="mb-3">Filtrer les rapports :</h5>
-                <p class="small text-muted mb-3">Tous les champs sont obligatoires.</p>
+                <p class="small text-muted mb-3">Les dates sont obligatoires.</p>
 
                 <!-- Filtre : Date de début -->
                 <label for="dateDebut">Date de début :</label>
@@ -36,21 +36,33 @@
                 <input type="date" name="dateFin" id="dateFin" class="form-control mb-3" required
                     value="<?php echo isset($_POST['dateFin']) ? htmlspecialchars($_POST['dateFin']) : ''; ?>">
 
-                <!-- Filtre : Praticien (Liste filtrée par région dans le contrôleur) -->
-                <label for="praticienFiltre">Praticien :</label>
-                <select name="praticienFiltre" id="praticienFiltre" class="form-select mb-3" required>
-                    <option value="">-- Choisir un praticien --</option>
-                    <?php
-                    // On conserve la sélection de l'utilisateur après soumission
-                    $praticienSelectionne = isset($_POST['praticienFiltre']) ? $_POST['praticienFiltre'] : '';
-
-                    // Itération sur la liste des praticiens (passée par le contrôleur)
-                    foreach ($praticiens as $praticien) {
-                        $selected = ($praticienSelectionne == $praticien['PRA_NUM']) ? 'selected' : '';
-                        echo '<option value="' . $praticien['PRA_NUM'] . '" ' . $selected . '>' . htmlspecialchars($praticien['PRA_NOM'] . ' ' . $praticien['PRA_PRENOM']) . '</option>';
-                    }
-                    ?>
-                </select>
+                <?php if (isset($lesVisiteurs)): ?>
+                    <!-- Filtre : Visiteur (Pour Délégués et Responsables) -->
+                    <label for="visiteurFiltre">Visiteur (optionnel) :</label>
+                    <select name="visiteurFiltre" id="visiteurFiltre" class="form-select mb-3">
+                        <option value="">-- Choisir un visiteur --</option>
+                        <?php
+                        $visiteurSelectionne = isset($_POST['visiteurFiltre']) ? $_POST['visiteurFiltre'] : '';
+                        foreach ($lesVisiteurs as $visiteur) {
+                            $selected = ($visiteurSelectionne == $visiteur['COL_MATRICULE']) ? 'selected' : '';
+                            echo '<option value="' . $visiteur['COL_MATRICULE'] . '" ' . $selected . '>' . htmlspecialchars($visiteur['COL_NOM'] . ' ' . $visiteur['COL_PRENOM']) . '</option>';
+                        }
+                        ?>
+                    </select>
+                <?php else: ?>
+                    <!-- Filtre : Praticien (Pour Visiteurs) -->
+                    <label for="praticienFiltre">Praticien (optionnel) :</label>
+                    <select name="praticienFiltre" id="praticienFiltre" class="form-select mb-3">
+                        <option value="">-- Choisir un praticien --</option>
+                        <?php
+                        $praticienSelectionne = isset($_POST['praticienFiltre']) ? $_POST['praticienFiltre'] : '';
+                        foreach ($praticiens as $praticien) {
+                            $selected = ($praticienSelectionne == $praticien['PRA_NUM']) ? 'selected' : '';
+                            echo '<option value="' . $praticien['PRA_NUM'] . '" ' . $selected . '>' . htmlspecialchars($praticien['PRA_NOM'] . ' ' . $praticien['PRA_PRENOM']) . '</option>';
+                        }
+                        ?>
+                    </select>
+                <?php endif; ?>
 
                 <!-- Boutons d'action : Valider la sélection -->
                 <div class="d-flex gap-2">

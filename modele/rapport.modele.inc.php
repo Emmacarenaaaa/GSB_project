@@ -508,4 +508,82 @@ function getEchantillonsOffertsByRapportNum($matricule, $rapNum)
         return [];
     }
 }
+
+/**
+ * Retourne les nouveaux rapports (État 1 - Validé) pour une région ou un secteur donné.
+ * @param string $region Code région (ex: 'NO')
+ * @param string $secteur Code secteur (ex: 'N')
+ * @return array Liste des rapports
+ */
+function getNouveauxRapports($region = null, $secteur = null)
+{
+    try {
+        $monPdo = connexionPDO();
+        $req = "SELECT r.RAP_NUM, r.RAP_DATEVISITE, c.COL_NOM, c.COL_PRENOM, 
+                       p.PRA_NUM, p.PRA_NOM, p.PRA_PRENOM, 
+                       m.MO_LIBELLE, r.RAP_MOTIF_AUTRE,
+                       md1.MED_NOMCOMMERCIAL as MED1, md2.MED_NOMCOMMERCIAL as MED2
+                FROM rapport_visite r
+                LEFT JOIN collaborateur c ON r.COL_MATRICULE = c.COL_MATRICULE
+                LEFT JOIN praticien p ON r.PRA_NUM = p.PRA_NUM
+                LEFT JOIN motif m ON r.MO_CODE = m.MO_CODE
+                LEFT JOIN medicament md1 ON r.MED_DEPOTLEGAL_PRESENTER1 = md1.MED_DEPOTLEGAL
+                LEFT JOIN medicament md2 ON r.MED_DEPOTLEGAL_PRESENTER2 = md2.MED_DEPOTLEGAL";
+
+        // Jointures supplémentaires si secteur requis pour filtrer via la région si besoin
+        if ($secteur) {
+            $req .= " LEFT JOIN region reg ON c.REG_CODE = reg.REG_CODE";
+        }
+
+        // Filtre ETAT = 1 (Validé, mais pas encore Consulté)
+        $req .= " WHERE r.ET_CODE = 1";
+
+        // Filtres Géographiques
+        if ($secteur) {
+            // Logique Secteur : Collaborateur du secteur OU de la région du secteur
+            $req .= " AND (c.SEC_CODE = :secteur OR (c.SEC_CODE IS NULL AND reg.SEC_CODE = :secteur))";
+        } elseif ($region) {
+            // Logique Région
+            $req .= " AND c.REG_CODE = :region";
+        }
+
+        // Tri
+        $req .= " ORDER BY c.COL_NOM, r.RAP_DATEVISITE DESC";
+
+        $stmt = $monPdo->prepare($req);
+
+        if ($secteur) {
+            $stmt->bindValue(':secteur', $secteur, PDO::PARAM_STR);
+        } elseif ($region) {
+            $stmt->bindValue(':region', $region, PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    } catch (PDOException $e) {
+        error_log("Erreur getNouveauxRapports : " . $e->getMessage());
+        return [];
+    }
+}
+
+/**
+ * Passe le rapport à l'état Consulté (2)
+ * @param int $rapNum
+ * @return bool
+ */
+function setRapportConsulte($rapNum)
+{
+    try {
+        $monPdo = connexionPDO();
+        $req = "UPDATE rapport_visite SET ET_CODE = 2 WHERE RAP_NUM = :rapNum AND ET_CODE = 1"; // Sécurité pour ne pas changer un brouillon
+        $stmt = $monPdo->prepare($req);
+        $stmt->bindValue(':rapNum', $rapNum, PDO::PARAM_INT);
+        $stmt->execute();
+        return true;
+    } catch (PDOException $e) {
+        error_log("Erreur setRapportConsulte : " . $e->getMessage());
+        return false;
+    }
+}
 ?>

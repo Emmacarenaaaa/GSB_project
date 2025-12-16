@@ -20,16 +20,24 @@ switch ($action) {
     case 'voirrapport': {
         // Récupérer les infos de l'utilisateur connecté
         $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
+        $habId = $_SESSION['hab_id'];
 
-        // Si responsable secteur (hab_id = 3)
-        if (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] == 3) {
-            $secteur = $_SESSION['sec_code'];
-            // Utiliser la nouvelle fonction basée sur la logique fournie
-            $praticiens = getPraticiensVisitesBySecteur($secteur);
+        // Si responsable secteur (hab_id = 3) ou Délégué (hab_id = 2)
+        if ($habId == 2 || $habId == 3) {
+            // Pour les cadres, on filtre par Visiteur (Collaborateur)
+            if ($habId == 3) {
+                // Responsable : Visiteurs du secteur
+                $secteur = $_SESSION['sec_code'];
+                $lesVisiteurs = getCollaborateursBySecteur($secteur);
+            } else {
+                // Délégué : Visiteurs de la région
+                $regionCode = $infosUtilisateur['reg_code'];
+                $lesVisiteurs = getCollaborateursByRegion($regionCode);
+            }
         } else {
-            // Comportement par défaut (Visiteur / Délégué régional)
+            // Visiteur (hab_id = 1) : On filtre par Praticien
             $regionCode = $infosUtilisateur['reg_code'];
-            $praticiens = getPraticiensVisites($regionCode);
+            $praticiens = getPraticiensByRegion($regionCode); // Utiliser la méthode du modèle
         }
 
         include("vues/v_selectionnerRapport.php");
@@ -46,16 +54,16 @@ switch ($action) {
         $dateFin = isset($_POST['dateFin']) && !empty($_POST['dateFin']) ? $_POST['dateFin'] : null;
         $praticienFiltre = isset($_POST['praticienFiltre']) && !empty($_POST['praticienFiltre']) ? $_POST['praticienFiltre'] : null;
 
-        // Validation : Tous les champs sont obligatoires
-        if (empty($dateDebut) || empty($dateFin) || empty($praticienFiltre)) {
+        // Validation : Date de début et Date de fin sont obligatoires
+        if (empty($dateDebut) || empty($dateFin)) {
             $_SESSION['erreur'] = true;
             // Redirection vers la selection avec le flag erreur
             header("Location: index.php?uc=rapportvisite&action=voirrapport");
             exit();
         }
 
-        // Le filtre visiteur n'est plus utilisé ici (géré par région/secteur/id)
-        $visiteurFiltre = null;
+        // Le filtre visiteur est récupéré s'il existe
+        $visiteurFiltre = isset($_POST['visiteurFiltre']) && !empty($_POST['visiteurFiltre']) ? $_POST['visiteurFiltre'] : null;
 
         // Récupérer les infos de l'utilisateur connecté pour obtenir sa région et son secteur
         $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
@@ -74,6 +82,8 @@ switch ($action) {
             $secteurFiltre = $secCode;
         }
 
+        // Note: Pour les Délégués (2) et Responsables (3), $visiteurFiltre contient la sélection du formulaire (ou null = tous)
+
         // Appel au modèle pour récupérer la liste des rapports filtrés
         $result = getAllRapportDeVisite($dateDebut, $dateFin, $praticienFiltre, $regionCode, $visiteurFiltre, $secteurFiltre);
 
@@ -85,6 +95,26 @@ switch ($action) {
      * Action : mesRapportsBrouillon
      * Affiche la liste des rapports à l'état "Brouillon" pour l'utilisateur connecté.
      */
+    case 'nouveauxRapportsRegion': {
+        $habilitations = getAllInformationCompte($_SESSION['matricule']);
+        $region = $habilitations['reg_code'];
+        $secteur = $habilitations['sec_code'];
+        $habId = $_SESSION['hab_id'];
+
+        if ($habId == 2) {
+            // Délégué Régional : Voir sa région
+            $result = getNouveauxRapports($region, null);
+            include("vues/v_listeRapportsRegion.php");
+        } elseif ($habId == 3) {
+            // Responsable Secteur : Voir son secteur
+            $result = getNouveauxRapports(null, $secteur);
+            include("vues/v_listeRapportsRegion.php");
+        } else {
+            header("Location: index.php?uc=accueil");
+        }
+        break;
+    }
+
     case 'mesRapportsBrouillon': {
         $matricule = $_SESSION['matricule'];
         // Récupère les rapports non validés/terminés
@@ -115,6 +145,16 @@ switch ($action) {
                 $carac[12] = ''; // nom remplacant
                 $carac[13] = ''; // prénom remplacant
             }
+
+            // NOUVEAU : Si Délégué (2) ou Responsable (3) consulte un rapport Validé (1), on le passe en Consulté (2)
+            // carac[19] est ET_CODE (voir getAllInformationRapportDeVisiteNum)
+            if (isset($_SESSION['hab_id']) && ($_SESSION['hab_id'] == 2 || $_SESSION['hab_id'] == 3) && $carac[19] == 1) {
+                setRapportConsulte($rapNum);
+                // On met à jour l'affichage localement pour que l'utilisateur voie "Consulté" (optionnel, mais mieux)
+                $carac[19] = 2;
+                $carac[18] = 'Consulté'; // On suppose que le libellé 2 est 'Consulté'
+            }
+
             include("vues/v_afficherRapportDeVisite.php");
         } else {
             $_SESSION['erreur'] = true;

@@ -1,11 +1,14 @@
 <div id="work_banner" class="banner-wrapper bg-light w-100 py-12">
-    <div class="banner-vertical-center-work container text-light d-flex justify-content-center align-items-center py-12 p-0">
+    <div
+        class="banner-vertical-center-work container text-light d-flex justify-content-center align-items-center py-12 p-0">
         <div class="banner-content col-lg-8 col-12 m-lg-auto text-center">
             <h1 class="banner-heading h2 display-3 pb-5 semi-bold-600"><u>Projet GSB</u></h1>
             <p class="banner-body pb-2 light-300 px-2">
                 <strong>
-                    Le laboratoire Galaxy Swiss Bourdin (GSB) est issu de la fusion entre le géant américain Galaxy et le conglomérat européen Swiss Bourdin.
-                    En 2009, les deux géants pharmaceutiques ont uni leurs forces pour créer un leader de ce secteur industriel.
+                    Le laboratoire Galaxy Swiss Bourdin (GSB) est issu de la fusion entre le géant américain Galaxy et
+                    le conglomérat européen Swiss Bourdin.
+                    En 2009, les deux géants pharmaceutiques ont uni leurs forces pour créer un leader de ce secteur
+                    industriel.
                     L'entité Galaxy Swiss Bourdin Europe a établi son siège administratif à Paris.
                     Le siège social de la multinationale est situé à Philadelphie, Pennsylvalnie, aux Etats-Unis
                 </strong>
@@ -25,17 +28,25 @@
                 }   C'EST POUR LES LOGINS, HABILITATIONS ET MONNAIE DES MDOCS
             */
             if (empty($_SESSION['login']) && empty($_SESSION['habilitation'])) {
-            ?>
+                ?>
                 <a href="index.php?uc=connexion&action=connexion">
-                    <button type="submit" class="btn rounded-pill btn-outline-light px-4 me-4 light-300">Se connecter</button>
+                    <button type="submit" class="btn rounded-pill btn-outline-light px-4 me-4 light-300">Se
+                        connecter</button>
                 </a>
-            <?php
+                <?php
             } else {
-            ?>
+                ?>
                 <a href="index.php?uc=connexion&action=profil">
                     <button type="submit" class="btn rounded-pill btn-outline-light px-4 me-4 light-300">Profil</button>
                 </a>
-            <?php
+                <?php if (isset($_SESSION['hab_id']) && ($_SESSION['hab_id'] == 2 || $_SESSION['hab_id'] == 3)): ?>
+                    <a href="index.php?uc=rapportvisite&action=nouveauxRapportsRegion">
+                        <button type="button" class="btn rounded-pill btn-info text-dark px-4 light-300">
+                            Consulter Nouveaux Rapports
+                        </button>
+                    </a>
+                <?php endif; ?>
+                <?php
             }
             ?>
         </div>
