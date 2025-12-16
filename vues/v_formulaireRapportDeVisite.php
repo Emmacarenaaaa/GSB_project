@@ -140,13 +140,28 @@ $remplacantVal = $isModification ? $carac[11] : (isset($_POST['numRemplacant']) 
                 </button>
                 <div class="form-text">Max 10 produits différents</div>
             </div>
-            <div id="etat-container">
-                <label for="etat">État du rapport <span style="color:red;">*</span> :</label>
-                <select name="etat" id="etat" required class="form-select">
-                    <option value="0" selected>Brouillon</option>
-                    <option value="1">Clos</option>
-                </select><br><br>
-            </div>
+
+            <!-- État -->
+            <div id="etat-container" class="form-check form-switch">
+    
+    <input type="hidden" name="etat" value="0">
+    
+    <input 
+        class="form-check-input" type="checkbox" 
+        role="switch" 
+        name="etat" 
+        value="1" 
+        id="etat"
+        <?php 
+        // L'indice 19 correspond à ET_CODE. 0 = Brouillon, 1 = Définitif
+        if (isset($carac[19]) && $carac[19] == 1) {
+            echo 'checked'; 
+        } 
+        ?>
+    >
+    <label class="form-check-label" for="etat"> Saisie définitive
+    </label>
+</div>
 
             <!-- Bouton Submit -->
             <div class="d-grid">

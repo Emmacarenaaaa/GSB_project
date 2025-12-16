@@ -39,6 +39,14 @@ switch ($action) {
         $dateFin = isset($_POST['dateFin']) && !empty($_POST['dateFin']) ? $_POST['dateFin'] : null;
         $praticienFiltre = isset($_POST['praticienFiltre']) && !empty($_POST['praticienFiltre']) ? $_POST['praticienFiltre'] : null;
 
+        // Validation : Tous les champs sont obligatoires
+        if (empty($dateDebut) || empty($dateFin) || empty($praticienFiltre)) {
+            $_SESSION['erreur'] = true;
+            // Redirection vers la selection avec le flag erreur
+            header("Location: index.php?uc=rapportvisite&action=voirrapport");
+            exit();
+        }
+
         // Le filtre visiteur n'est plus utilisé ici (géré par région/secteur/id)
         $visiteurFiltre = null;
 

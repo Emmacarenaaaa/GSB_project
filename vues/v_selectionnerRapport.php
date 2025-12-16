@@ -24,21 +24,22 @@
             <form id="formFiltre" action="index.php?uc=rapportvisite&action=validerSelection" method="post"
                 class="formulaire-recherche col-12 m-0 mb-4 p-3 border rounded">
                 <h5 class="mb-3">Filtrer les rapports :</h5>
+                <p class="small text-muted mb-3">Tous les champs sont obligatoires.</p>
 
                 <!-- Filtre : Date de début -->
-                <label for="dateDebut">Date de début (optionnel) :</label>
-                <input type="date" name="dateDebut" id="dateDebut" class="form-control mb-3"
+                <label for="dateDebut">Date de début :</label>
+                <input type="date" name="dateDebut" id="dateDebut" class="form-control mb-3" required
                     value="<?php echo isset($_POST['dateDebut']) ? htmlspecialchars($_POST['dateDebut']) : ''; ?>">
 
                 <!-- Filtre : Date de fin -->
-                <label for="dateFin">Date de fin (optionnel) :</label>
-                <input type="date" name="dateFin" id="dateFin" class="form-control mb-3"
+                <label for="dateFin">Date de fin :</label>
+                <input type="date" name="dateFin" id="dateFin" class="form-control mb-3" required
                     value="<?php echo isset($_POST['dateFin']) ? htmlspecialchars($_POST['dateFin']) : ''; ?>">
 
                 <!-- Filtre : Praticien (Liste filtrée par région dans le contrôleur) -->
-                <label for="praticienFiltre">Praticien (optionnel) :</label>
-                <select name="praticienFiltre" id="praticienFiltre" class="form-select mb-3">
-                    <option value="">-- Tous les praticiens --</option>
+                <label for="praticienFiltre">Praticien :</label>
+                <select name="praticienFiltre" id="praticienFiltre" class="form-select mb-3" required>
+                    <option value="">-- Choisir un praticien --</option>
                     <?php
                     // On conserve la sélection de l'utilisateur après soumission
                     $praticienSelectionne = isset($_POST['praticienFiltre']) ? $_POST['praticienFiltre'] : '';
