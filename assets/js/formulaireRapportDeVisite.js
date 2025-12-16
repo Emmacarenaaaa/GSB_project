@@ -26,11 +26,23 @@ function validerFormulaire() {
         let qte = row.querySelector('.echantillon-qte').value;
 
         if (medoc && (qte <= 0 || qte == '')) {
-            alert("La quantité pour l'échantillon " + (i + 1) + " doit être supérieure à 0.");
-            return false;
+            if (!confirm("Vous n'avez pas saisi de quantité pour l'échantillon " + (i + 1) + ". Voulez-vous confirmer l'enregistrement ?")) {
+                row.querySelector('.echantillon-qte').focus();
+                return false;
+            }
         }
         if (!medoc && qte > 0) {
             alert("Veuillez sélectionner un médicament pour l'échantillon " + (i + 1) + ".");
+            return false;
+        }
+    }
+
+    // Validation des médicaments présentés
+    var medoc1 = document.getElementById('medoc1').value;
+    var medoc2 = document.getElementById('medoc2').value;
+
+    if (medoc1 === '' && medoc2 === '') {
+        if (!confirm("Aucun médicament présenté n'a été saisi. Voulez-vous confirmer l'enregistrement ?")) {
             return false;
         }
     }
@@ -117,5 +129,49 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
         // Ajouter une ligne vide par défaut en création ou si pas d'échantillons
         addEchantillonRow();
+    }
+
+    // --- 3. Logique Coefficient Confiance ---
+    const praSelect = document.getElementById('praticien');
+    const rempSelect = document.getElementById('numRemplacant');
+    const coefInput = document.getElementById('coefConfiance');
+    const oldCoefDisplay = document.getElementById('oldCoefDisplay');
+
+    function updateCoef() {
+        if (!praSelect || !coefInput) return;
+
+        let selectedCoef = '';
+        let source = '';
+
+        // Priorité au remplaçant si sélectionné
+        if (rempSelect && rempSelect.value !== '') {
+            const option = rempSelect.options[rempSelect.selectedIndex];
+            selectedCoef = option.getAttribute('data-coef');
+            source = ' (Remplaçant)';
+        } else {
+            const option = praSelect.options[praSelect.selectedIndex];
+            if (option) selectedCoef = option.getAttribute('data-coef');
+            source = ' (Praticien)';
+        }
+
+        // On met à jour la valeur
+        // Si null en base, on met vide.
+        coefInput.value = selectedCoef ? selectedCoef : '';
+
+        if (oldCoefDisplay) {
+            oldCoefDisplay.title = selectedCoef
+                ? "Valeur actuelle en base : " + selectedCoef + source
+                : "Pas de valeur en base" + source;
+        }
+    }
+
+    if (praSelect) {
+        praSelect.addEventListener('change', updateCoef);
+        // Initialiser au chargement (pour modification ou pré-remplissage)
+        setTimeout(updateCoef, 100);
+    }
+
+    if (rempSelect) {
+        rempSelect.addEventListener('change', updateCoef);
     }
 });

@@ -137,8 +137,10 @@ function validerFormulaire() {
         let qte = row.querySelector('.echantillon-qte').value;
 
         if (medoc && (qte <= 0 || qte == '')) {
-            alert("La quantité pour l'échantillon " + (i + 1) + " doit être supérieure à 0.");
-            return false;
+            if (!confirm("Vous n'avez pas saisi de quantité pour l'échantillon " + (i + 1) + ". Voulez-vous confirmer l'enregistrement ?")) {
+                row.querySelector('.echantillon-qte').focus();
+                return false;
+            }
         }
         if (!medoc && qte > 0) {
             alert("Veuillez sélectionner un médicament pour l'échantillon " + (i + 1) + ".");

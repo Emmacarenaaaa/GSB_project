@@ -20,7 +20,7 @@ switch ($action) {
     case 'voirrapport': {
         // Récupérer les infos de l'utilisateur connecté
         $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
-        
+
         // Si responsable secteur (hab_id = 3)
         if (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] == 3) {
             $secteur = $_SESSION['sec_code'];
@@ -131,13 +131,23 @@ switch ($action) {
     case 'saisirrapport': {
         // BLOQUER l'accès pour HAB_id = 3 (Responsable) qui ne saisit pas de rapports
         if (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] == 3) {
-            $_SESSION['erreur'] = 'Vous n\'avez pas les droits pour créer un rapport.';
-            header('Location: index.php?uc=rapportvisite&action=voirrapport');
+            header('Location: index.php?uc=accueil');
             exit;
         }
 
         // Chargement des données nécessaires au formulaire (motifs, médicaments...)
         $motifs = getMotifs();
+
+        // NOUVEAU : Vérifier s'il y a des brouillons
+        $matricule = $_SESSION['matricule'];
+        $lesRapportsBrouillon = getLesRapportsBrouillon($matricule);
+        $forceCreate = isset($_GET['force']) && $_GET['force'] == 1;
+
+        if (!empty($lesRapportsBrouillon) && !$forceCreate) {
+            $autoDetectedDrafts = true; // Flag pour la vue
+            include("vues/v_rapportsBrouillon.php");
+            break; // On s'arrête là, on n'affiche pas le formulaire de création
+        }
 
         // Récupération de la région de l'utilisateur pour filtrer les praticiens
         $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
@@ -203,15 +213,20 @@ switch ($action) {
                 $medoc_id_safe = htmlspecialchars($medoc_id_raw, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
                 // Validation : La quantité doit être > 0 si le produit est sélectionné
+                // MODIFICATION : Autoriser NULL (voir modification plus bas)
+                /*
                 if ($quantite <= 0) {
                     $_SESSION['erreur'] = 'Veuillez spécifier une quantité positive pour l\'échantillon ' . $i . '.';
                     header('Location: index.php?uc=rapportvisite&action=saisirrapport');
                     exit;
                 }
+                */
+
+                $quantiteFinale = ($quantite > 0) ? $quantite : null;
 
                 $echantillonsOfferts[] = [
                     'medoc_id' => $medoc_id_safe,
-                    'quantite' => $quantite
+                    'quantite' => $quantiteFinale
                 ];
             }
 
@@ -271,6 +286,15 @@ switch ($action) {
             );
 
             if ($resultat) {
+                // MISE À JOUR DU COEFFICIENT DE CONFIANCE (NOUVEAU)
+                $coefConfiance = isset($_POST['coefConfiance']) ? $_POST['coefConfiance'] : null;
+                // Si un remplaçant est défini, c'est lui qui est visité (donc son coef est maj)
+                $targetPra = !empty($numRemplacant) ? $numRemplacant : $numPraticien;
+
+                if ($coefConfiance !== null && $coefConfiance !== '') {
+                    updateCoefConfiance($targetPra, $coefConfiance);
+                }
+
                 $_SESSION['succes'] = 'Rapport bien enregistré !';
                 header('Location: index.php?uc=rapportvisite&action=voirrapport');
                 exit;
@@ -397,20 +421,28 @@ switch ($action) {
                 }
 
                 // Validation : La quantité doit être > 0 si le produit est sélectionné
+                // MODIFICATION : On autorise 0 ou NULL avec avertissement JS côté client,
+                // donc côté serveur on stocke 0 ou NULL si c'est le cas.
+                /*
                 if ($quantite <= 0) {
                     $_SESSION['erreur'] = 'Veuillez spécifier une quantité positive pour l\'échantillon ' . $i . ' (' . $medoc_id_raw . ').';
                     header("Location: index.php?uc=rapportvisite&action=editerrapport&rapports=$rapNum");
                     exit;
                 }
+                */
 
                 // Assainissement final et stockage
                 $medoc_id_safe = htmlspecialchars($medoc_id_raw, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+                // Si quantité <= 0 ou vide, on la considère comme NULL ou 0 selon besoin.
+                // La demande est "vérifie qu'on puisse avoir une valeur null".
+                $quantiteFinale = ($quantite > 0) ? $quantite : null;
 
                 $echantillonsOfferts[] = [
                     // La valeur 'medoc_id' est garantie non-vide ici,
                     // car les entrées vides sont ignorées ou causent une sortie anticipée.
                     'medoc_id' => $medoc_id_safe,
-                    'quantite' => $quantite
+                    'quantite' => $quantiteFinale
                 ];
             }
 
@@ -434,6 +466,14 @@ switch ($action) {
             );
 
             if ($resultat) {
+                // MISE À JOUR DU COEFFICIENT DE CONFIANCE (NOUVEAU)
+                $coefConfiance = isset($_POST['coefConfiance']) ? $_POST['coefConfiance'] : null;
+                $targetPra = !empty($numRemplacant) ? $numRemplacant : $numPraticien;
+
+                if ($coefConfiance !== null && $coefConfiance !== '') {
+                    updateCoefConfiance($targetPra, $coefConfiance);
+                }
+
                 $_SESSION['succes'] = 'Rapport modifié avec succès !';
                 header('Location: index.php?uc=rapportvisite&action=mesRapportsBrouillon');
                 exit;

@@ -39,9 +39,21 @@ $remplacantVal = $isModification ? $carac[11] : (isset($_POST['numRemplacant']) 
                         if (!empty($praticien['REG_NOM'])) {
                             $label .= ' (' . $praticien['REG_NOM'] . ')';
                         }
-                        echo '<option value="' . $praticien['PRA_NUM'] . '" ' . $selected . '>' . htmlspecialchars($label) . '</option>';
+                        // AJOUTER DATA-COEF
+                        $coef = isset($praticien['PRA_COEFCONFIANCE']) ? $praticien['PRA_COEFCONFIANCE'] : '';
+                        echo '<option value="' . $praticien['PRA_NUM'] . '" data-coef="' . $coef . '" ' . $selected . '>' . htmlspecialchars($label) . '</option>';
                     } ?>
                 </select>
+            </div>
+
+            <!-- Coefficient de Confiance (Nouveau champ) -->
+            <div class="mb-3">
+                <label for="coefConfiance" class="form-label">Coefficient de confiance <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <input type="number" step="0.01" name="coefConfiance" id="coefConfiance" class="form-control" placeholder="Note du praticien (ex: 5.50)" required>
+                    <span class="input-group-text" id="oldCoefDisplay" title="Ancienne valeur en base">?</span>
+                </div>
+                <div class="form-text">Ce coefficient sera mis à jour pour le praticien (ou le remplaçant) sélectionné.</div>
             </div>
 
             <!-- Date de Visite -->
@@ -122,7 +134,9 @@ $remplacantVal = $isModification ? $carac[11] : (isset($_POST['numRemplacant']) 
                         if (!empty($praticien['REG_NOM'])) {
                             $label .= ' (' . $praticien['REG_NOM'] . ')';
                         }
-                        echo '<option value="' . $praticien['PRA_NUM'] . '" ' . $selected . '>' . htmlspecialchars($label) . '</option>';
+                         // AJOUTER DATA-COEF
+                        $coef = isset($praticien['PRA_COEFCONFIANCE']) ? $praticien['PRA_COEFCONFIANCE'] : '';
+                        echo '<option value="' . $praticien['PRA_NUM'] . '" data-coef="' . $coef . '" ' . $selected . '>' . htmlspecialchars($label) . '</option>';
                     } ?>
                 </select>
             </div>

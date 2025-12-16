@@ -451,7 +451,12 @@ function insertEchantillonsOfferts(PDO $monPdo, $matricule, $rapNum, $echantillo
         $stmtInsert->bindValue(':col_matricule', $matricule, PDO::PARAM_STR);
         $stmtInsert->bindValue(':rap_num', $rapNum, PDO::PARAM_INT);
         $stmtInsert->bindValue(':med_depotlegal', $offre['medoc_id'], PDO::PARAM_STR);
-        $stmtInsert->bindValue(':qte_off', $offre['quantite'], PDO::PARAM_INT);
+
+        if ($offre['quantite'] === null) {
+            $stmtInsert->bindValue(':qte_off', null, PDO::PARAM_NULL);
+        } else {
+            $stmtInsert->bindValue(':qte_off', $offre['quantite'], PDO::PARAM_INT);
+        }
 
         $stmtInsert->execute();
     }

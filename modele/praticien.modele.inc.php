@@ -117,7 +117,7 @@ function getPraticiensByRegion($region)
 {
     try {
         $monPdo = connexionPDO();
-        $req = 'SELECT DISTINCT p.PRA_NUM, p.PRA_PRENOM, p.PRA_NOM 
+        $req = 'SELECT DISTINCT p.PRA_NUM, p.PRA_PRENOM, p.PRA_NOM, p.PRA_COEFCONFIANCE 
                 FROM praticien p
                 JOIN departement d ON LEFT(p.PRA_CP, 2) = d.NoDEPT
                 WHERE d.REG_CODE = "' . $region . '"
@@ -170,6 +170,32 @@ function getPraticiensVisitesBySecteur($secteur)
     } catch (PDOException $e) {
         print "Erreur !: " . $e->getMessage();
         die();
+    }
+}
+
+function updateCoefConfiance($praNum, $coef)
+{
+    try {
+        $monPdo = connexionPDO();
+        // Le coefficient peut être NULL (vide) ou decimal
+        if ($coef === '' || $coef === null) {
+            // Décision métier : garde-t-on l'ancien ou met-on NULL ? 
+            // Si l'utilisateur efface le champ, on pourrait mettre NULL.
+            // Supposons NULL permis ou 0.
+            $req = "UPDATE praticien SET PRA_COEFCONFIANCE = NULL WHERE PRA_NUM = :praNum";
+            $stmt = $monPdo->prepare($req);
+        } else {
+            $req = "UPDATE praticien SET PRA_COEFCONFIANCE = :coef WHERE PRA_NUM = :praNum";
+            $stmt = $monPdo->prepare($req);
+            $stmt->bindValue(':coef', $coef, PDO::PARAM_STR);
+        }
+
+        $stmt->bindValue(':praNum', $praNum, PDO::PARAM_INT);
+        $stmt->execute();
+        return true;
+    } catch (PDOException $e) {
+        error_log("Erreur updateCoefConfiance : " . $e->getMessage());
+        return false;
     }
 }
 ?>
