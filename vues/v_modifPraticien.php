@@ -3,7 +3,7 @@
         <div class="structure-hero pt-lg-5 pt-4">
             <h1 class="titre text-center">Gestion des praticiens</h1>
             <p class="text text-center">
-                Interface de gestion permettant au délégué de créer, modifier 
+                Interface de gestion permettant au délégué de créer, modifier
                 et consulter les praticiens de son secteur.
             </p>
         </div>
@@ -23,7 +23,8 @@
                 <form method="get" action="index.php" style="display:inline-block;">
                     <input type="hidden" name="uc" value="praticien">
                     <input type="hidden" name="action" value="formulaireprat">
-                    <button type="submit" class="btn btn-outline-primary">Retour sur le formulaire de praticiens</button>
+                    <button type="submit" class="btn btn-outline-primary">Retour sur le formulaire de
+                        praticiens</button>
                 </form>
             </div>
 
@@ -44,10 +45,11 @@
                     <div class="card shadow">
                         <div class="card-body p-4">
                             <h3 class="card-title mb-4">Gestion des praticiens</h3>
-                            
+
                             <form method="post" action="index.php?uc=praticien&action=modif">
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold" for="praticien_select">Sélectionner un praticien :</label>
+                                    <label class="form-label fw-bold" for="praticien_select">Sélectionner un praticien
+                                        :</label>
                                     <select name="praticien_select" id="praticien_select" class="form-select mt-2" required>
                                         <option value="">-- Choisissez un praticien --</option>
                                         <?php foreach ($praticiens as $prat): ?>
@@ -79,51 +81,54 @@
                             <h3 class="card-title mb-4">
                                 <?= empty($infosPrat['matriculepraticien']) ? 'Créer un nouveau praticien' : 'Modifier le praticien' ?>
                             </h3>
-                            
+
                             <form id="formPraticien" method="post" action="index.php?uc=praticien&action=modif">
                                 <input type="hidden" name="form_action" value="valider">
-                                <input type="hidden" name="pranum" value="<?= htmlspecialchars($infosPrat['matriculepraticien'] ?? '') ?>">
+                                <input type="hidden" name="pranum"
+                                    value="<?= htmlspecialchars($infosPrat['matriculepraticien'] ?? '') ?>">
 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold" for="pranom">Nom * :</label>
-                                    <input type="text" name="pranom" id="pranom" class="form-control" 
-                                           value="<?= htmlspecialchars($infosPrat['nom'] ?? '') ?>" required>
+                                    <input type="text" name="pranom" id="pranom" class="form-control"
+                                        value="<?= htmlspecialchars($infosPrat['nom'] ?? '') ?>" required>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold" for="praprenom">Prénom * :</label>
-                                    <input type="text" name="praprenom" id="praprenom" class="form-control" 
-                                           value="<?= htmlspecialchars($infosPrat['prenom'] ?? '') ?>" required>
+                                    <input type="text" name="praprenom" id="praprenom" class="form-control"
+                                        value="<?= htmlspecialchars($infosPrat['prenom'] ?? '') ?>" required>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold" for="praadresse">Adresse :</label>
-                                    <input type="text" name="praadresse" id="praadresse" class="form-control" 
-                                           value="<?= htmlspecialchars($infosPrat['adresse'] ?? '') ?>">
+                                    <input type="text" name="praadresse" id="praadresse" class="form-control"
+                                        value="<?= htmlspecialchars($infosPrat['adresse'] ?? '') ?>">
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold" for="pracp">Code postal :</label>
-                                    <input type="text" name="pracp" id="pracp" class="form-control" 
-                                           value="<?= htmlspecialchars($infosPrat['codepostal'] ?? '') ?>">
+                                    <input type="text" name="pracp" id="pracp" class="form-control"
+                                        value="<?= htmlspecialchars($infosPrat['codepostal'] ?? '') ?>">
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold" for="praville">Ville :</label>
-                                    <input type="text" name="praville" id="praville" class="form-control" 
-                                           value="<?= htmlspecialchars($infosPrat['ville'] ?? '') ?>">
+                                    <input type="text" name="praville" id="praville" class="form-control"
+                                        value="<?= htmlspecialchars($infosPrat['ville'] ?? '') ?>">
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold" for="pracoefnotoriete">Coefficient notoriété :</label>
-                                    <input type="number" name="pracoefnotoriete" id="pracoefnotoriete" class="form-control" 
-                                           step="0.01" value="<?= htmlspecialchars($infosPrat['coefficientdenotoriete'] ?? '') ?>">
+                                    <input type="number" name="pracoefnotoriete" id="pracoefnotoriete" class="form-control"
+                                        step="0.01"
+                                        value="<?= htmlspecialchars($infosPrat['coefficientdenotoriete'] ?? '') ?>">
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label fw-bold" for="pracoefconfiance">Coefficient confiance :</label>
-                                    <input type="number" name="pracoefconfiance" id="pracoefconfiance" class="form-control" 
-                                           step="0.01" value="<?= htmlspecialchars($infosPrat['coefficientdeconfiance'] ?? '') ?>">
+                                    <input type="number" name="pracoefconfiance" id="pracoefconfiance" class="form-control"
+                                        step="0.01"
+                                        value="<?= htmlspecialchars($infosPrat['coefficientdeconfiance'] ?? '') ?>">
                                 </div>
 
                                 <div class="mb-3">
@@ -145,10 +150,11 @@
                                         <?php foreach ($specialites as $spe): ?>
                                             <?php $checked = in_array($spe['SPE_CODE'], $specialites_prat) ? 'checked' : ''; ?>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="specialites[]" 
-                                                       id="spe_<?= htmlspecialchars($spe['SPE_CODE']) ?>" 
-                                                       value="<?= htmlspecialchars($spe['SPE_CODE']) ?>" <?= $checked ?>>
-                                                <label class="form-check-label" for="spe_<?= htmlspecialchars($spe['SPE_CODE']) ?>">
+                                                <input class="form-check-input" type="checkbox" name="specialites[]"
+                                                    id="spe_<?= htmlspecialchars($spe['SPE_CODE']) ?>"
+                                                    value="<?= htmlspecialchars($spe['SPE_CODE']) ?>" <?= $checked ?>>
+                                                <label class="form-check-label"
+                                                    for="spe_<?= htmlspecialchars($spe['SPE_CODE']) ?>">
                                                     <?= htmlspecialchars($spe['SPE_LIBELLE']) ?>
                                                 </label>
                                             </div>
@@ -174,21 +180,4 @@
         </div>
     </div>
 </section>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.querySelector('#formPraticien');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                // Check if we are validating (form_action usually hidden input, but button click triggers submit)
-                // Actually the form has hidden input name="form_action" value="valider"
-                
-                const checked = document.querySelectorAll('input[name="specialites[]"]:checked');
-                if (checked.length === 0) {
-                    if (!confirm("Vous n'avez sélectionné aucune spécialité. Voulez-vous continuer (Aucune spécialité sera affichée) ?")) {
-                        e.preventDefault();
-                    }
-                }
-            });
-        }
-    });
-</script>
+<script src="assets/js/modifPraticien.js"></script>

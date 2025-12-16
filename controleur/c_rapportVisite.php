@@ -415,7 +415,7 @@ switch ($action) {
                 $medoc2,
                 $numRemplacant,
                 $etat,
-                $echantillonsOfferts // 10ème argument
+                $echantillonsOfferts
             );
 
             if ($resultat) {
