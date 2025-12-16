@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Hôte : 127.0.0.1:3307
--- Généré le : mar. 14 oct. 2025 à 09:29
--- Version du serveur : 11.5.2-MariaDB
--- Version de PHP : 8.3.14
+-- Host: 127.0.0.1:3307
+-- Generation Time: Dec 16, 2025 at 10:00 AM
+-- Server version: 11.5.2-MariaDB
+-- PHP Version: 8.3.14
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +18,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de données : `gsb_v1`
+-- Database: `gsb_v1`
 --
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `collaborateur`
+-- Table structure for table `collaborateur`
 --
 
 DROP TABLE IF EXISTS `collaborateur`;
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS `collaborateur` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
--- Déchargement des données de la table `collaborateur`
+-- Dumping data for table `collaborateur`
 --
 
 INSERT INTO `collaborateur` (`COL_MATRICULE`, `HAB_id`, `COL_NOM`, `COL_PRENOM`, `COL_ADRESSE`, `COL_CP`, `COL_VILLE`, `COL_DATEEMBAUCHE`, `SEC_CODE`, `REG_CODE`) VALUES
@@ -75,7 +75,7 @@ INSERT INTO `collaborateur` (`COL_MATRICULE`, `HAB_id`, `COL_NOM`, `COL_PRENOM`,
 ('e52', 2, 'Eynde', 'Valerie', '3 r Henri Moissan', '76000', 'ROUEN', '1991-10-31 00:00:00', NULL, 'NO'),
 ('f21', 1, 'Finck', 'Jacques', 'rte Montreuil Bellay', '74000', 'ANNECY', '1993-06-08 00:00:00', NULL, 'RA'),
 ('f39', 2, 'Fremont', 'Fernande', '4 r Jean Giono', '69000', 'LYON', '1997-02-15 00:00:00', NULL, 'RA'),
-('f4', 3, 'Gest', 'Alain', '30 r Authie', '46000', 'FIGEAC', '1994-05-03 00:00:00', NULL, 'OC'),
+('f4', 3, 'Gest', 'Alain', '30 r Authie', '46000', 'FIGEAC', '1994-05-03 00:00:00', 'S', 'OC'),
 ('g19', 2, 'Gheysen', 'Galassus', '32 bd Mar Foch', '75000', 'PARIS', '1996-01-18 00:00:00', NULL, 'IF'),
 ('g30', 1, 'Girard', 'Yvon', '31 av 6 Juin', '80000', 'AMIENS', '1999-03-27 00:00:00', NULL, 'HF'),
 ('g53', 2, 'Gombert', 'Luc', '32 r Emile Gueymard', '56000', 'VANNES', '1985-10-02 00:00:00', NULL, 'BG'),
@@ -83,7 +83,7 @@ INSERT INTO `collaborateur` (`COL_MATRICULE`, `HAB_id`, `COL_NOM`, `COL_PRENOM`,
 ('h13', 1, 'Guindon', 'François', '44 r Picotière', '19000', 'TULLE', '1993-05-08 00:00:00', NULL, 'AQ'),
 ('h30', 1, 'Igigabel', 'Guy', '33 gal Arlequin', '94000', 'CRETEIL', '1998-04-26 00:00:00', NULL, 'IF'),
 ('h35', 2, 'Jourdren', 'Pierre', '34 av Jean Perrot', '15000', 'AURRILLAC', '1993-08-26 00:00:00', NULL, 'RA'),
-('h40', 2, 'Juttard', 'Pierre-Raoul', '34 cours Jean Jaurès', '8000', 'SEDAN', '1992-11-01 00:00:00', NULL, 'GE'),
+('h40', 3, 'Juttard', 'Pierre-Raoul', '34 cours Jean Jaurès', '08000', 'SEDAN', '1992-11-01 00:00:00', 'E', 'GE'),
 ('j45', 1, 'Laboure-Morel', 'Saout', '38 cours Berriat', '52000', 'CHAUMONT', '1998-02-25 00:00:00', NULL, 'GE'),
 ('j50', 1, 'Landre', 'Philippe', '4 av Gén Laperrine', '59000', 'LILLE', '1992-12-16 00:00:00', NULL, 'HF'),
 ('j8', 2, 'Langeard', 'Hugues', '39 av Jean Perrot', '93000', 'BAGNOLET', '1998-06-18 00:00:00', NULL, 'IF'),
@@ -120,7 +120,7 @@ INSERT INTO `collaborateur` (`COL_MATRICULE`, `HAB_id`, `COL_NOM`, `COL_PRENOM`,
 -- --------------------------------------------------------
 
 --
--- Structure de la table `departement`
+-- Table structure for table `departement`
 --
 
 DROP TABLE IF EXISTS `departement`;
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS `departement` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 --
--- Déchargement des données de la table `departement`
+-- Dumping data for table `departement`
 --
 
 INSERT INTO `departement` (`NoDEPT`, `Departement`, `REG_CODE`) VALUES
@@ -235,7 +235,7 @@ INSERT INTO `departement` (`NoDEPT`, `Departement`, `REG_CODE`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `dosage`
+-- Table structure for table `dosage`
 --
 
 DROP TABLE IF EXISTS `dosage`;
@@ -249,7 +249,7 @@ CREATE TABLE IF NOT EXISTS `dosage` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `etat`
+-- Table structure for table `etat`
 --
 
 DROP TABLE IF EXISTS `etat`;
@@ -260,7 +260,7 @@ CREATE TABLE IF NOT EXISTS `etat` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
--- Déchargement des données de la table `etat`
+-- Dumping data for table `etat`
 --
 
 INSERT INTO `etat` (`etat_code`, `etat_libelle`) VALUES
@@ -270,7 +270,7 @@ INSERT INTO `etat` (`etat_code`, `etat_libelle`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `famille`
+-- Table structure for table `famille`
 --
 
 DROP TABLE IF EXISTS `famille`;
@@ -281,7 +281,7 @@ CREATE TABLE IF NOT EXISTS `famille` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
--- Déchargement des données de la table `famille`
+-- Dumping data for table `famille`
 --
 
 INSERT INTO `famille` (`FAM_CODE`, `FAM_LIBELLE`) VALUES
@@ -309,7 +309,7 @@ INSERT INTO `famille` (`FAM_CODE`, `FAM_LIBELLE`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `formuler`
+-- Table structure for table `formuler`
 --
 
 DROP TABLE IF EXISTS `formuler`;
@@ -323,7 +323,7 @@ CREATE TABLE IF NOT EXISTS `formuler` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `habilitation`
+-- Table structure for table `habilitation`
 --
 
 DROP TABLE IF EXISTS `habilitation`;
@@ -334,7 +334,7 @@ CREATE TABLE IF NOT EXISTS `habilitation` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
--- Déchargement des données de la table `habilitation`
+-- Dumping data for table `habilitation`
 --
 
 INSERT INTO `habilitation` (`HAB_id`, `HAB_lib`) VALUES
@@ -345,7 +345,7 @@ INSERT INTO `habilitation` (`HAB_id`, `HAB_lib`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `interagir`
+-- Table structure for table `interagir`
 --
 
 DROP TABLE IF EXISTS `interagir`;
@@ -359,7 +359,7 @@ CREATE TABLE IF NOT EXISTS `interagir` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `login`
+-- Table structure for table `login`
 --
 
 DROP TABLE IF EXISTS `login`;
@@ -373,7 +373,7 @@ CREATE TABLE IF NOT EXISTS `login` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
--- Déchargement des données de la table `login`
+-- Dumping data for table `login`
 --
 
 INSERT INTO `login` (`LOG_ID`, `LOG_LOGIN`, `LOG_MOTDEPASSE`, `COL_MATRICULE`) VALUES
@@ -447,7 +447,7 @@ INSERT INTO `login` (`LOG_ID`, `LOG_LOGIN`, `LOG_MOTDEPASSE`, `COL_MATRICULE`) V
 -- --------------------------------------------------------
 
 --
--- Structure de la table `medicament`
+-- Table structure for table `medicament`
 --
 
 DROP TABLE IF EXISTS `medicament`;
@@ -464,7 +464,7 @@ CREATE TABLE IF NOT EXISTS `medicament` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
--- Déchargement des données de la table `medicament`
+-- Dumping data for table `medicament`
 --
 
 INSERT INTO `medicament` (`MED_DEPOTLEGAL`, `MED_NOMCOMMERCIAL`, `MED_COMPOSITION`, `MED_EFFETS`, `MED_CONTREINDIC`, `MED_PRIXECHANTILLON`, `FAM_CODE`) VALUES
@@ -500,7 +500,7 @@ INSERT INTO `medicament` (`MED_DEPOTLEGAL`, `MED_NOMCOMMERCIAL`, `MED_COMPOSITIO
 -- --------------------------------------------------------
 
 --
--- Structure de la table `motif`
+-- Table structure for table `motif`
 --
 
 DROP TABLE IF EXISTS `motif`;
@@ -511,7 +511,7 @@ CREATE TABLE IF NOT EXISTS `motif` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
--- Déchargement des données de la table `motif`
+-- Dumping data for table `motif`
 --
 
 INSERT INTO `motif` (`MO_Code`, `MO_Libelle`) VALUES
@@ -523,7 +523,7 @@ INSERT INTO `motif` (`MO_Code`, `MO_Libelle`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `offrir`
+-- Table structure for table `offrir`
 --
 
 DROP TABLE IF EXISTS `offrir`;
@@ -539,7 +539,7 @@ CREATE TABLE IF NOT EXISTS `offrir` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `posseder`
+-- Table structure for table `posseder`
 --
 
 DROP TABLE IF EXISTS `posseder`;
@@ -552,10 +552,23 @@ CREATE TABLE IF NOT EXISTS `posseder` (
   KEY `POSSEDER_praticien1_FK` (`PRA_NUM`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
+--
+-- Dumping data for table `posseder`
+--
+
+INSERT INTO `posseder` (`SPE_CODE`, `PRA_NUM`, `POS_DIPLOME`, `POS_COEFPRESCRIPTIO`) VALUES
+('CMF', 89, '', 0),
+('CPR', 89, '', 0),
+('DN', 88, '', 0),
+('MN', 56, '', 0),
+('NRL', 87, '', 0),
+('STO', 56, '', 0),
+('TXA', 56, '', 0);
+
 -- --------------------------------------------------------
 
 --
--- Structure de la table `praticien`
+-- Table structure for table `praticien`
 --
 
 DROP TABLE IF EXISTS `praticien`;
@@ -574,7 +587,7 @@ CREATE TABLE IF NOT EXISTS `praticien` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
--- Déchargement des données de la table `praticien`
+-- Dumping data for table `praticien`
 --
 
 INSERT INTO `praticien` (`PRA_NUM`, `PRA_PRENOM`, `PRA_NOM`, `PRA_ADRESSE`, `PRA_CP`, `PRA_VILLE`, `PRA_COEFNOTORIETE`, `PRA_COEFCONFIANCE`, `TYP_CODE`) VALUES
@@ -633,7 +646,7 @@ INSERT INTO `praticien` (`PRA_NUM`, `PRA_PRENOM`, `PRA_NOM`, `PRA_ADRESSE`, `PRA
 (53, 'Myriam', 'Vittorio', '3 pl Champlain', '94000', 'BOISSY SAINT LEGER', 356.23, 0.5, 'PS'),
 (54, 'Nhieu', 'Lapasset', '31 av 6 Juin', '52000', 'CHAUMONT', 107, 0.5, 'PH'),
 (55, 'Nicole', 'Plantet-Besnier', '10 av 1ère Armée Française', '86000', 'CHATELLEREAULT', 369.94, 0.5, 'PO'),
-(56, 'Pascal', 'Chubilleau', '3 r Hastings', '15000', 'AURRILLAC', 290.75, 0.5, 'MH'),
+(56, 'Pascal', 'Chubilleau', '3 r Hastings XXXX', '15000', 'AURRILLAC', 290.75, 0.5, 'PS'),
 (57, 'Pascal', 'Robert', '31 r St Jean', '93000', 'BOBIGNY', 162.41, 0.5, 'MV'),
 (58, 'Pascale', 'Jean', '114 r Authie', '49100', 'SAUMUR', 375.52, 0.5, 'PS'),
 (59, 'Patrice', 'Chanteloube', '14 av Thiès', '13000', 'MARSEILLE', 478.01, 0.5, 'PH'),
@@ -663,12 +676,16 @@ INSERT INTO `praticien` (`PRA_NUM`, `PRA_PRENOM`, `PRA_NOM`, `PRA_ADRESSE`, `PRA
 (83, 'Thierry', 'Gauchet', '7 r Desmoueux', '38100', 'GRENOBLE', 406.1, 0.5, 'PS'),
 (84, 'Tristan', 'Bobichon', '219 r Caponière', '9000', 'FOIX', 218.36, 0.5, 'PH'),
 (85, 'Véronique', 'Duchemin-Laniel', '130 r St Jean', '33000', 'LIBOURNE', 265.61, 0.5, 'PO'),
-(86, 'Younès', 'Laurent', '34 r Demolombe', '53000', 'MAYENNE', 496.1, 0.5, 'MH');
+(86, 'Younès', 'Laurent', '34 r Demolombe', '53000', 'MAYENNE', 496.1, 0.5, 'MH'),
+(87, 'EF', 'CEY', '3 r Hastings', '15000', 'LAON', 2, 2, 'MV'),
+(88, 'TEST', 'TEST', '85 rue des rues', '21000', 'GIEN', 5, 5, 'MH'),
+(89, 'Eva', 'Caylen', '210 RUE PIERRE ROSSET', '74460', 'MARNAZ', 0.2, 1.3, 'PS'),
+(90, 'EfeT', 'CeylanT', '12 rue de la gare', '14000', 'Caen', 0.2, 1, 'MV');
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `prescrire`
+-- Table structure for table `prescrire`
 --
 
 DROP TABLE IF EXISTS `prescrire`;
@@ -685,7 +702,7 @@ CREATE TABLE IF NOT EXISTS `prescrire` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `presentation`
+-- Table structure for table `presentation`
 --
 
 DROP TABLE IF EXISTS `presentation`;
@@ -698,7 +715,7 @@ CREATE TABLE IF NOT EXISTS `presentation` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `rapport_visite`
+-- Table structure for table `rapport_visite`
 --
 
 DROP TABLE IF EXISTS `rapport_visite`;
@@ -726,19 +743,24 @@ CREATE TABLE IF NOT EXISTS `rapport_visite` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
--- Déchargement des données de la table `rapport_visite`
+-- Dumping data for table `rapport_visite`
 --
 
 INSERT INTO `rapport_visite` (`COL_MATRICULE`, `RAP_NUM`, `RAP_DATEVISITE`, `RAP_BILAN`, `RAP_MOTIF_AUTRE`, `RAP_AUTRE`, `RAP_DATESAISIE`, `ET_CODE`, `PRA_NUM`, `MO_Code`, `PRA_NUM_REMPLACANT`, `MED_DEPOTLEGAL_PRESENTER1`, `MED_DEPOTLEGAL_PRESENTER2`) VALUES
-('a131', 1, '2002-04-18', 'Médecin curieux, à recontacter en décembre pour réunion.', NULL, NULL, '0000-00-00', 0, 23, NULL, NULL, NULL, NULL),
-('a131', 2, '2003-03-23', 'RAS.\r\nChangement de tel : 05 89 89 89 89.', NULL, NULL, '0000-00-00', 0, 41, NULL, NULL, NULL, NULL),
-('a131', 3, '2021-12-03', 'Médecin énervé, ancien boxeur !', NULL, NULL, '0000-00-00', 0, 7, NULL, NULL, NULL, NULL),
-('a17', 1, '2003-05-21', 'Changement de direction, redéfinition de la politique médicamenteuse, recours au générique.', NULL, NULL, '0000-00-00', 0, 4, NULL, NULL, NULL, NULL);
+('a131', 1, '2002-04-18', 'Médecin curieux, à recontacter en décembre pour réunion.', NULL, NULL, '0000-00-00', 0, 23, 1, NULL, NULL, NULL),
+('a131', 2, '2003-03-23', 'RAS.\r\nChangement de tel : 05 89 89 89 89.', NULL, NULL, '0000-00-00', 0, 41, 1, NULL, NULL, NULL),
+('a131', 3, '2021-12-03', 'Médecin énervé, ancien boxeur !', NULL, NULL, '0000-00-00', 0, 7, 1, NULL, NULL, NULL),
+('a131', 4, '2025-11-12', 'Malade', NULL, NULL, '2025-11-24', 1, 81, 2, NULL, NULL, NULL),
+('a131', 5, '2025-11-06', 'Pas malade', NULL, NULL, '2025-11-24', 1, 41, 2, NULL, 'AMOPIL7', NULL),
+('a131', 6, '2025-11-23', 'Test modificationPas malade', NULL, NULL, '2025-11-24', 1, 87, 1, NULL, NULL, NULL),
+('a131', 7, '2025-11-22', 'tres malade', NULL, NULL, '2025-11-24', 1, 87, 2, NULL, NULL, NULL),
+('a17', 1, '2003-05-21', 'Changement de direction, redéfinition de la politique médicamenteuse, recours au générique.', NULL, NULL, '0000-00-00', 0, 4, 2, NULL, NULL, NULL),
+('a17', 2, '2025-11-30', 'bien', NULL, NULL, '2025-12-01', 1, 82, 2, 26, 'CLAZER6', 'JOVAI8');
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `region`
+-- Table structure for table `region`
 --
 
 DROP TABLE IF EXISTS `region`;
@@ -751,7 +773,7 @@ CREATE TABLE IF NOT EXISTS `region` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
--- Déchargement des données de la table `region`
+-- Dumping data for table `region`
 --
 
 INSERT INTO `region` (`REG_CODE`, `REG_NOM`, `SEC_CODE`) VALUES
@@ -778,7 +800,7 @@ INSERT INTO `region` (`REG_CODE`, `REG_NOM`, `SEC_CODE`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `secteur`
+-- Table structure for table `secteur`
 --
 
 DROP TABLE IF EXISTS `secteur`;
@@ -789,7 +811,7 @@ CREATE TABLE IF NOT EXISTS `secteur` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
--- Déchargement des données de la table `secteur`
+-- Dumping data for table `secteur`
 --
 
 INSERT INTO `secteur` (`SEC_CODE`, `SEC_LIBELLE`) VALUES
@@ -802,7 +824,7 @@ INSERT INTO `secteur` (`SEC_CODE`, `SEC_LIBELLE`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `specialite`
+-- Table structure for table `specialite`
 --
 
 DROP TABLE IF EXISTS `specialite`;
@@ -813,7 +835,7 @@ CREATE TABLE IF NOT EXISTS `specialite` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
--- Déchargement des données de la table `specialite`
+-- Dumping data for table `specialite`
 --
 
 INSERT INTO `specialite` (`SPE_CODE`, `SPE_LIBELLE`) VALUES
@@ -865,7 +887,7 @@ INSERT INTO `specialite` (`SPE_CODE`, `SPE_LIBELLE`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `type_frais`
+-- Table structure for table `type_frais`
 --
 
 DROP TABLE IF EXISTS `type_frais`;
@@ -879,7 +901,7 @@ CREATE TABLE IF NOT EXISTS `type_frais` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `type_individu`
+-- Table structure for table `type_individu`
 --
 
 DROP TABLE IF EXISTS `type_individu`;
@@ -890,7 +912,7 @@ CREATE TABLE IF NOT EXISTS `type_individu` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
--- Déchargement des données de la table `type_individu`
+-- Dumping data for table `type_individu`
 --
 
 INSERT INTO `type_individu` (`tin_code`, `tin_libelle`) VALUES
@@ -900,7 +922,7 @@ INSERT INTO `type_individu` (`tin_code`, `tin_libelle`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `type_praticien`
+-- Table structure for table `type_praticien`
 --
 
 DROP TABLE IF EXISTS `type_praticien`;
@@ -912,7 +934,7 @@ CREATE TABLE IF NOT EXISTS `type_praticien` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 --
--- Déchargement des données de la table `type_praticien`
+-- Dumping data for table `type_praticien`
 --
 
 INSERT INTO `type_praticien` (`TYP_CODE`, `TYP_LIBELLE`, `TYP_LIEU`) VALUES
@@ -923,11 +945,11 @@ INSERT INTO `type_praticien` (`TYP_CODE`, `TYP_LIBELLE`, `TYP_LIEU`) VALUES
 ('PS', 'Personnel de santé', 'Centre paramédical');
 
 --
--- Contraintes pour les tables déchargées
+-- Constraints for dumped tables
 --
 
 --
--- Contraintes pour la table `collaborateur`
+-- Constraints for table `collaborateur`
 --
 ALTER TABLE `collaborateur`
   ADD CONSTRAINT `collaborateur_habilitation0_FK` FOREIGN KEY (`HAB_id`) REFERENCES `habilitation` (`HAB_id`),
@@ -935,59 +957,59 @@ ALTER TABLE `collaborateur`
   ADD CONSTRAINT `collaborateur_secteur0_FK` FOREIGN KEY (`SEC_CODE`) REFERENCES `secteur` (`SEC_CODE`);
 
 --
--- Contraintes pour la table `departement`
+-- Constraints for table `departement`
 --
 ALTER TABLE `departement`
   ADD CONSTRAINT `departement_reg1` FOREIGN KEY (`REG_CODE`) REFERENCES `region` (`REG_CODE`);
 
 --
--- Contraintes pour la table `formuler`
+-- Constraints for table `formuler`
 --
 ALTER TABLE `formuler`
   ADD CONSTRAINT `FORMULER_medicament0_FK` FOREIGN KEY (`MED_DEPOTLEGAL`) REFERENCES `medicament` (`MED_DEPOTLEGAL`),
   ADD CONSTRAINT `FORMULER_presentation1_FK` FOREIGN KEY (`PRE_CODE`) REFERENCES `presentation` (`PRE_CODE`);
 
 --
--- Contraintes pour la table `interagir`
+-- Constraints for table `interagir`
 --
 ALTER TABLE `interagir`
   ADD CONSTRAINT `interagir_medicament0_FK` FOREIGN KEY (`MED_DEPOTLEGAL_PERTURBE`) REFERENCES `medicament` (`MED_DEPOTLEGAL`),
   ADD CONSTRAINT `interagir_medicament1_FK` FOREIGN KEY (`MED_DEPOTLEGAL_PERTURBATEUR`) REFERENCES `medicament` (`MED_DEPOTLEGAL`);
 
 --
--- Contraintes pour la table `login`
+-- Constraints for table `login`
 --
 ALTER TABLE `login`
   ADD CONSTRAINT `login_collaborateur1` FOREIGN KEY (`COL_MATRICULE`) REFERENCES `collaborateur` (`COL_MATRICULE`);
 
 --
--- Contraintes pour la table `medicament`
+-- Constraints for table `medicament`
 --
 ALTER TABLE `medicament`
   ADD CONSTRAINT `medicament_famille0_FK` FOREIGN KEY (`FAM_CODE`) REFERENCES `famille` (`FAM_CODE`);
 
 --
--- Contraintes pour la table `offrir`
+-- Constraints for table `offrir`
 --
 ALTER TABLE `offrir`
   ADD CONSTRAINT `offrir_medicament1_FK` FOREIGN KEY (`med_depotlegal`) REFERENCES `medicament` (`MED_DEPOTLEGAL`),
   ADD CONSTRAINT `offrir_rapport_visite1_FK` FOREIGN KEY (`col_matricule`,`rap_num`) REFERENCES `rapport_visite` (`COL_MATRICULE`, `RAP_NUM`);
 
 --
--- Contraintes pour la table `posseder`
+-- Constraints for table `posseder`
 --
 ALTER TABLE `posseder`
   ADD CONSTRAINT `POSSEDER_praticien1_FK` FOREIGN KEY (`PRA_NUM`) REFERENCES `praticien` (`PRA_NUM`),
   ADD CONSTRAINT `POSSEDER_specialite0_FK` FOREIGN KEY (`SPE_CODE`) REFERENCES `specialite` (`SPE_CODE`);
 
 --
--- Contraintes pour la table `praticien`
+-- Constraints for table `praticien`
 --
 ALTER TABLE `praticien`
   ADD CONSTRAINT `praticien_type_praticien0_FK` FOREIGN KEY (`TYP_CODE`) REFERENCES `type_praticien` (`TYP_CODE`);
 
 --
--- Contraintes pour la table `prescrire`
+-- Constraints for table `prescrire`
 --
 ALTER TABLE `prescrire`
   ADD CONSTRAINT `prescrire_dosage1` FOREIGN KEY (`dos_code`) REFERENCES `dosage` (`dos_code`),
@@ -995,7 +1017,7 @@ ALTER TABLE `prescrire`
   ADD CONSTRAINT `prescrire_typeindividu1` FOREIGN KEY (`tin_code`) REFERENCES `type_individu` (`tin_code`);
 
 --
--- Contraintes pour la table `rapport_visite`
+-- Constraints for table `rapport_visite`
 --
 ALTER TABLE `rapport_visite`
   ADD CONSTRAINT `rapport_visite_etat_FK` FOREIGN KEY (`ET_CODE`) REFERENCES `etat` (`etat_code`),
@@ -1007,7 +1029,7 @@ ALTER TABLE `rapport_visite`
   ADD CONSTRAINT `rapport_visite_visiteur0_FK` FOREIGN KEY (`COL_MATRICULE`) REFERENCES `collaborateur` (`COL_MATRICULE`);
 
 --
--- Contraintes pour la table `region`
+-- Constraints for table `region`
 --
 ALTER TABLE `region`
   ADD CONSTRAINT `region_secteur0_FK` FOREIGN KEY (`SEC_CODE`) REFERENCES `secteur` (`SEC_CODE`);
