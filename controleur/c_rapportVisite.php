@@ -20,10 +20,17 @@ switch ($action) {
     case 'voirrapport': {
         // Récupérer les infos de l'utilisateur connecté
         $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
-        $regionCode = $infosUtilisateur['reg_code'];
-
-        // Récupérer la liste des praticiens pour le filtre (ceux ayant déjà été visités)
-        $praticiens = getPraticiensVisites($regionCode);
+        
+        // Si responsable secteur (hab_id = 3)
+        if (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] == 3) {
+            $secteur = $_SESSION['sec_code'];
+            // Utiliser la nouvelle fonction basée sur la logique fournie
+            $praticiens = getPraticiensVisitesBySecteur($secteur);
+        } else {
+            // Comportement par défaut (Visiteur / Délégué régional)
+            $regionCode = $infosUtilisateur['reg_code'];
+            $praticiens = getPraticiensVisites($regionCode);
+        }
 
         include("vues/v_selectionnerRapport.php");
         break;

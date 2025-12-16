@@ -54,7 +54,7 @@
                                         <option value="">-- Choisissez un praticien --</option>
                                         <?php foreach ($praticiens as $prat): ?>
                                             <option value="<?= htmlspecialchars($prat['PRA_NUM']) ?>">
-                                                <?= htmlspecialchars($prat['PRA_NUM'] . ' - ' . $prat['PRA_NOM'] . ' ' . $prat['PRA_PRENOM']) ?>
+                                                <?= htmlspecialchars($prat['PRA_NOM'] . ' ' . $prat['PRA_PRENOM']) ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>

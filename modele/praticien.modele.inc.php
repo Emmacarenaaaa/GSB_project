@@ -6,7 +6,7 @@ function getAllNomPraticien()
 {
     try {
         $monPdo = connexionPDO();
-        $req = 'SELECT PRA_NUM, PRA_PRENOM, PRA_NOM FROM praticien ORDER BY PRA_NOM';
+        $req = 'SELECT PRA_PRENOM, PRA_NOM FROM praticien ORDER BY PRA_NOM';
         $res = $monPdo->query($req);
         $result = $res->fetchAll();
         return $result;
@@ -97,9 +97,12 @@ function getPraticiensBySecteur($secteur)
         $monPdo = connexionPDO();
         $req = 'SELECT DISTINCT p.PRA_NUM, p.PRA_PRENOM, p.PRA_NOM 
                 FROM praticien p
-                JOIN departement d ON LEFT(p.PRA_CP, 2) = d.NoDEPT
-                JOIN region r ON d.REG_CODE = r.REG_CODE
-                WHERE r.SEC_CODE = "' . $secteur . '"
+                WHERE SUBSTRING(p.PRA_CP, 1, 2) IN (
+                    SELECT d.NoDEPT 
+                    FROM departement d
+                    INNER JOIN region r ON d.REG_CODE = r.REG_CODE
+                    WHERE r.SEC_CODE = "' . $secteur . '"
+                )
                 ORDER BY p.PRA_NOM';
         $res = $monPdo->query($req);
         $result = $res->fetchAll();
@@ -137,6 +140,29 @@ function getPraticiensVisites($region)
                 JOIN departement d ON LEFT(p.PRA_CP, 2) = d.NoDEPT
                 JOIN rapport_visite rv ON rv.PRA_NUM = p.PRA_NUM
                 WHERE d.REG_CODE = "' . $region . '"
+                ORDER BY p.PRA_NOM';
+        $res = $monPdo->query($req);
+        $result = $res->fetchAll();
+        return $result;
+    } catch (PDOException $e) {
+        print "Erreur !: " . $e->getMessage();
+        die();
+    }
+}
+
+function getPraticiensVisitesBySecteur($secteur)
+{
+    try {
+        $monPdo = connexionPDO();
+        $req = 'SELECT DISTINCT p.PRA_NUM, p.PRA_PRENOM, p.PRA_NOM 
+                FROM praticien p
+                JOIN rapport_visite rv ON rv.PRA_NUM = p.PRA_NUM
+                WHERE SUBSTRING(p.PRA_CP, 1, 2) IN (
+                    SELECT d.NoDEPT 
+                    FROM departement d
+                    INNER JOIN region r ON d.REG_CODE = r.REG_CODE
+                    WHERE r.SEC_CODE = "' . $secteur . '"
+                )
                 ORDER BY p.PRA_NOM';
         $res = $monPdo->query($req);
         $result = $res->fetchAll();

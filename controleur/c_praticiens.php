@@ -10,11 +10,7 @@ if (!isset($_REQUEST['action']) || empty($_REQUEST['action'])) {
 switch ($action) {
 	case 'formulaireprat': {
 		// ce qu'on affiche dans "praticiens" 
-		if (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] == 3 && isset($_SESSION['sec_code'])) {
-			$result = getPraticiensBySecteur($_SESSION['sec_code']);
-		} elseif (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] == 2 && isset($_SESSION['reg_code'])) {
-			$result = getAllNomPraticien();
-		} else {
+		if (isset($_SESSION['hab_id'])){
 			$result = getAllNomPraticien();
 		}
 		include("vues/v_formulairePraticien.php");
