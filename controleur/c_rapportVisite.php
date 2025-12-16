@@ -278,6 +278,7 @@ switch ($action) {
      */
     case 'editerrapport': {
         $rapNum = $_REQUEST['rapports'];
+        $matricule = $_SESSION['matricule'];
         // Récupération des données du rapport
         $carac = getAllInformationRapportDeVisiteNum($rapNum);
 
@@ -293,20 +294,16 @@ switch ($action) {
             header("Location: index.php?uc=rapportvisite&action=voirrapport");
             exit;
         }
-
+        $echantillonsInitiaux = getEchantillonsOffertsByRapportNum($matricule, $rapNum);
         // Récupération des données du rapport  (retourne les données)
-
         $motifs = getMotifs();
         $medicaments = getMedicaments();
-
         // Récupération de la région pour filtrer les praticiens
         $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
         $regionCode = $infosUtilisateur['reg_code'];
         $praticiens = getPraticiensByRegion($regionCode);
 
         // Le code du visiteur est déjà en session
-
-
         $mode = 'modification'; // Indicateur pour la vue
 
         include("vues/v_formulaireRapportDeVisite.php");
@@ -402,6 +399,8 @@ switch ($action) {
                 ];
             }
 
+            $dateVisite = $_POST['dateVisite'] ?? null;
+
             // --- 3. MISE À JOUR EN BASE DE DONNÉES ---
 
             // Assurez-vous que votre fonction updateRapport a bien 10 arguments !
@@ -415,7 +414,8 @@ switch ($action) {
                 $medoc2,
                 $numRemplacant,
                 $etat,
-                $echantillonsOfferts
+                $echantillonsOfferts,
+                $dateVisite
             );
 
             if ($resultat) {

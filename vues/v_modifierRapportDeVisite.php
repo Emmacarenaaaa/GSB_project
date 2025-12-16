@@ -79,6 +79,17 @@
                 <option value="2">Clos</option>
             </select><br><br>
 
+            <!-- Section Echantillons -->
+            <hr class="my-4">
+            <div class="mb-4">
+                <label class="form-label">Échantillons Offerts</label>
+                <div id="echantillons-container"></div>
+                <button type="button" class="btn btn-outline-secondary btn-sm mt-2" id="ajouter-echantillon">
+                    + Ajouter un échantillon
+                </button>
+                <div class="form-text">Max 10 produits différents</div>
+            </div>
+
             <div class="d-flex justify-content-between">
                 <a href="index.php?uc=rapportvisite&action=voirrapport" class="btn btn-secondary">Annuler</a>
                 <input class="btn btn-success" type="submit" value="Enregistrer les modifications">
@@ -87,4 +98,37 @@
     </div>
 </div>
 
+<!-- Template Échantillon -->
+<template id="echantillon-template">
+    <div class="echantillon-row row mb-2 g-2 align-items-end">
+        <div class="col-12 col-sm-6">
+            <label class="form-label small text-muted">Échantillon <span class="echantillon-index">1</span></label>
+            <select name="echantillon_medoc_X" class="form-select form-select-sm echantillon-medoc">
+                <option value="">Aucun</option>
+                <?php foreach ($medicaments as $medoc) {
+                    echo '<option value="' . $medoc['MED_DEPOTLEGAL'] . '">' . htmlspecialchars($medoc['MED_NOMCOMMERCIAL']) . '</option>';
+                } ?>
+            </select>
+        </div>
+        <div class="col-8 col-sm-4">
+            <label class="form-label small text-muted">Quantité</label>
+            <input type="number" name="echantillon_qte_X" min="1" max="99"
+                class="form-control form-control-sm echantillon-qte">
+        </div>
+        <div class="col-4 col-sm-2 text-end">
+            <button type="button" class="btn btn-danger btn-sm w-100 supprimer-echantillon">
+                X
+            </button>
+        </div>
+    </div>
+</template>
+
+<?php
+$echantillonsDataJSON = isset($echantillonsInitiaux) ? json_encode($echantillonsInitiaux) : '[]';
+?>
+
+<script>
+    // 1. Définition de la variable globale JS lisible par le script externe
+    const ECHANTILLONS_INITIAUX = <?php echo $echantillonsDataJSON; ?>; 
+</script>
 <script src="assets/js/modifierRapportDeVisite.js"></script>

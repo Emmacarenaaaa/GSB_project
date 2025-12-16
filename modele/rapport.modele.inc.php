@@ -476,4 +476,31 @@ function updateEchantillonsOfferts(PDO $monPdo, $matricule, $rapNum, $echantillo
 
     return insertEchantillonsOfferts($monPdo, $matricule, $rapNum, $echantillonsOfferts);
 }
+/**
+ * Récupère tous les échantillons offerts pour un rapport spécifique.
+ * @param string $matricule Le matricule du collaborateur.
+ * @param int $rapNum Le numéro du rapport.
+ * @return array Tableau d'échantillons [{MED_DEPOTLEGAL, QTE_OFF}, ...]
+ */
+function getEchantillonsOffertsByRapportNum($matricule, $rapNum)
+{
+    try {
+        $monPdo = connexionPDO();
+        // NOTE: On utilise les noms de colonnes réels (qte_off, COL_MATRICULE)
+        $req = "SELECT MED_DEPOTLEGAL, qte_off AS QTE 
+                FROM offrir 
+                WHERE COL_MATRICULE = :matricule AND RAP_NUM = :rapNum 
+                ORDER BY MED_DEPOTLEGAL";
+
+        $stmt = $monPdo->prepare($req);
+        $stmt->bindValue(':matricule', $matricule, PDO::PARAM_STR);
+        $stmt->bindValue(':rapNum', $rapNum, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Erreur getEchantillonsOfferts : " . $e->getMessage());
+        return [];
+    }
+}
 ?>

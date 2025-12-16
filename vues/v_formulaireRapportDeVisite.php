@@ -12,7 +12,7 @@ $motifCodeVal = $isModification ? '' : (isset($_POST['motif']) ? $_POST['motif']
 $motifAutreVal = $isModification ? ($carac[5] != 'Autre' && !in_array($carac[5], array_column($motifs, 'MO_LIBELLE')) ? $carac[5] : '') : '';
 $bilanVal = $isModification ? $carac[6] : (isset($_POST['bilan']) ? $_POST['bilan'] : '');
 $medoc1Val = $isModification ? $carac[14] : (isset($_POST['medoc1']) ? $_POST['medoc1'] : '');
-$medoc2Val = $isModification ? $carac[15] : (isset($_POST['medoc2']) ? $_POST['medoc2'] : '');
+$medoc2Val = $isModification ? $carac[16] : (isset($_POST['medoc2']) ? $_POST['medoc2'] : '');
 $remplacantVal = $isModification ? $carac[11] : (isset($_POST['numRemplacant']) ? $_POST['numRemplacant'] : '');
 ?>
 
@@ -31,7 +31,7 @@ $remplacantVal = $isModification ? $carac[11] : (isset($_POST['numRemplacant']) 
             <!-- Praticien -->
             <div class="mb-3">
                 <label for="praticien" class="form-label">Praticien <span class="text-danger">*</span></label>
-                <select name="praticien" id="praticien" required class="form-select" <?php echo $isModification ? 'disabled' : ''; ?>>
+                <select name="praticien" id="praticien" required class="form-select">
                     <option value="">-- Sélectionner --</option>
                     <?php foreach ($praticiens as $praticien) {
                         $selected = ($praticien['PRA_NUM'] == $praNumVal) ? 'selected' : '';
@@ -42,9 +42,6 @@ $remplacantVal = $isModification ? $carac[11] : (isset($_POST['numRemplacant']) 
                         echo '<option value="' . $praticien['PRA_NUM'] . '" ' . $selected . '>' . htmlspecialchars($label) . '</option>';
                     } ?>
                 </select>
-                <?php if ($isModification): ?>
-                    <input type="hidden" name="praticien" value="<?php echo $praNumVal; ?>">
-                <?php endif; ?>
             </div>
 
             <!-- Date de Visite -->
@@ -146,8 +143,8 @@ $remplacantVal = $isModification ? $carac[11] : (isset($_POST['numRemplacant']) 
             <div id="etat-container">
                 <label for="etat">État du rapport <span style="color:red;">*</span> :</label>
                 <select name="etat" id="etat" required class="form-select">
-                    <option value="1" selected>Brouillon</option>
-                    <option value="2">Clos</option>
+                    <option value="0" selected>Brouillon</option>
+                    <option value="1">Clos</option>
                 </select><br><br>
             </div>
 
@@ -186,5 +183,12 @@ $remplacantVal = $isModification ? $carac[11] : (isset($_POST['numRemplacant']) 
         </div>
     </div>
 </template>
+
+<?php
+$echantillonsDataJSON = isset($echantillonsInitiaux) ? json_encode($echantillonsInitiaux) : '[]';
+?>
+<script>
+    var ECHANTILLONS_INITIAUX = <?php echo $echantillonsDataJSON; ?>;
+</script>
 
 <script src="assets/js/formulaireRapportDeVisite.js"></script>

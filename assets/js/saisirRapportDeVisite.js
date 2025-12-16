@@ -66,53 +66,83 @@ function validerFormulaire() {
         document.getElementById('bilan').focus();
         return false;
     }
+    //validation des echantillons offerts
+    var echantillonRows = document.querySelectorAll('#echantillons-container .echantillon-row');
+    var medocsUtilises = new Set();
+    var echantillonsValides = false;
+    for (let i = 0; i < echantillonRows.length; i++) {
+        var row = echantillonRows[i];
+        var medocSelect = row.querySelector('.echantillon-medoc');
+        var qteInput = row.querySelector('.echantillon-qte');
 
-    // BLOCAGE STRICT : La date ne peut PAS être dans le futur
-    var dateSelectionnee = new Date(dateVisite);
-    var aujourdhui = new Date();
-    aujourdhui.setHours(0, 0, 0, 0);
+        var medocId = medocSelect.value;
+        var quantite = parseInt(qteInput.value);
 
-    if (dateSelectionnee > aujourdhui) {
-        alert('ERREUR : La date de visite ne peut pas être dans le futur.\nVeuillez sélectionner une date antérieure ou égale à aujourd\'hui.');
-        document.getElementById('dateVisite').focus();
-        return false;
+        // Si le médicament est sélectionné (ID non vide)
+        if (medocId !== '') {
+            echantillonsValides = true;
+
+            // VÉRIFICATION A : Quantité
+            if (isNaN(quantite) || quantite <= 0) {
+                alert('ERREUR : Veuillez spécifier une quantité positive pour l\'échantillon ' + (i + 1) + '.');
+                qteInput.focus();
+                return false;
+            }
+        } else if (qteInput.value !== '' && qteInput.value !== '0') {
+            // VÉRIFICATION C : Quantité > 0 mais Médicament non sélectionné
+            alert('ERREUR : Une quantité est spécifiée pour l\'échantillon ' + (i + 1) + ' sans qu\'aucun médicament ne soit sélectionné.');
+            medocSelect.focus();
+            return false;
+        }
+
+
+        // BLOCAGE STRICT : La date ne peut PAS être dans le futur
+        var dateSelectionnee = new Date(dateVisite);
+        var aujourdhui = new Date();
+        aujourdhui.setHours(0, 0, 0, 0);
+
+        if (dateSelectionnee > aujourdhui) {
+            alert('ERREUR : La date de visite ne peut pas être dans le futur.\nVeuillez sélectionner une date antérieure ou égale à aujourd\'hui.');
+            document.getElementById('dateVisite').focus();
+            return false;
+        }
+
+        // Récupérer les textes pour l'affichage
+        var praticienTexte = document.getElementById('praticien').options[document.getElementById('praticien').selectedIndex].text;
+        var motifTexte = document.getElementById('motif').options[document.getElementById('motif').selectedIndex].text;
+        var etatTexte = document.getElementById('etat').options[document.getElementById('etat').selectedIndex].text;
+
+        // Message de confirmation détaillé
+        var message = 'CONFIRMEZ-VOUS L\'ENREGISTREMENT DE CE RAPPORT ?\n\n';
+        message += '=====================================\n';
+        message += 'Praticien : ' + praticienTexte + '\n';
+        message += 'Date de visite : ' + dateVisite + '\n';
+        message += 'Motif : ' + motifTexte + '\n';
+
+        if (motif == '4') {
+            message += 'Precision : ' + document.getElementById('motif_autre').value + '\n';
+        }
+
+        var medoc1Select = document.getElementById('medoc1');
+        if (medoc1Select.value !== '') {
+            message += 'Medicament 1 : ' + medoc1Select.options[medoc1Select.selectedIndex].text + '\n';
+        }
+
+        var medoc2Select = document.getElementById('medoc2');
+        if (medoc2Select.value !== '') {
+            message += 'Medicament 2 : ' + medoc2Select.options[medoc2Select.selectedIndex].text + '\n';
+        }
+
+        var remplacantSelect = document.getElementById('numRemplacant');
+        if (remplacantSelect.value !== '') {
+            message += 'Remplacant : ' + remplacantSelect.options[remplacantSelect.selectedIndex].text + '\n';
+        }
+
+        message += 'Etat : ' + etatTexte + '\n';
+        message += '=====================================\n\n';
+        message += 'Cliquez sur OK pour enregistrer.';
+
+        // Retourner true si confirmé, false sinon
+        return confirm(message);
     }
-
-    // Récupérer les textes pour l'affichage
-    var praticienTexte = document.getElementById('praticien').options[document.getElementById('praticien').selectedIndex].text;
-    var motifTexte = document.getElementById('motif').options[document.getElementById('motif').selectedIndex].text;
-    var etatTexte = document.getElementById('etat').options[document.getElementById('etat').selectedIndex].text;
-
-    // Message de confirmation détaillé
-    var message = 'CONFIRMEZ-VOUS L\'ENREGISTREMENT DE CE RAPPORT ?\n\n';
-    message += '=====================================\n';
-    message += 'Praticien : ' + praticienTexte + '\n';
-    message += 'Date de visite : ' + dateVisite + '\n';
-    message += 'Motif : ' + motifTexte + '\n';
-
-    if (motif == '4') {
-        message += 'Precision : ' + document.getElementById('motif_autre').value + '\n';
-    }
-
-    var medoc1Select = document.getElementById('medoc1');
-    if (medoc1Select.value !== '') {
-        message += 'Medicament 1 : ' + medoc1Select.options[medoc1Select.selectedIndex].text + '\n';
-    }
-
-    var medoc2Select = document.getElementById('medoc2');
-    if (medoc2Select.value !== '') {
-        message += 'Medicament 2 : ' + medoc2Select.options[medoc2Select.selectedIndex].text + '\n';
-    }
-
-    var remplacantSelect = document.getElementById('numRemplacant');
-    if (remplacantSelect.value !== '') {
-        message += 'Remplacant : ' + remplacantSelect.options[remplacantSelect.selectedIndex].text + '\n';
-    }
-
-    message += 'Etat : ' + etatTexte + '\n';
-    message += '=====================================\n\n';
-    message += 'Cliquez sur OK pour enregistrer.';
-
-    // Retourner true si confirmé, false sinon
-    return confirm(message);
 }
