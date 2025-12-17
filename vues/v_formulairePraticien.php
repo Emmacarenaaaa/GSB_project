@@ -18,7 +18,7 @@
                 } ?>
                 <form action="index.php?uc=praticien&action=afficherprat" method="post"
                     class="formulaire-recherche col-12 m-0">
-                    <label class="titre-formulaire" for="listeprat">Praticiens disponible :</label>
+                    <label class="titre-formulaire" for="listeprat">Praticiens disponibles :</label>
                     <select required name="praticien" class="form-select mt-3">
                         <option value class="text-center">- Choisissez un praticien -</option>
                         <?php

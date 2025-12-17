@@ -6,7 +6,7 @@ function getAllNomPraticien()
 {
     try {
         $monPdo = connexionPDO();
-        $req = 'SELECT PRA_PRENOM, PRA_NOM FROM praticien ORDER BY PRA_NOM';
+        $req = 'SELECT PRA_NUM,PRA_PRENOM, PRA_NOM FROM praticien ORDER BY PRA_NOM';
         $res = $monPdo->query($req);
         $result = $res->fetchAll();
         return $result;
