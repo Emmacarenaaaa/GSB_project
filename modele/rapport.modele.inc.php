@@ -4,7 +4,7 @@ function getAllRapportDeVisite($dateDebut = null, $dateFin = null, $praticienFil
 {
     try {
         $monPdo = connexionPDO();
-        $req = "SELECT r.RAP_NUM, r.RAP_DATEVISITE, c.COL_NOM, c.COL_PRENOM, 
+        $req = "SELECT r.RAP_NUM, r.RAP_DATEVISITE, r.COL_MATRICULE, c.COL_NOM, c.COL_PRENOM, 
                        p.PRA_NUM, p.PRA_NOM, p.PRA_PRENOM, 
                        m.MO_LIBELLE, r.RAP_MOTIF_AUTRE,
                        md1.MED_NOMCOMMERCIAL as MED1, md2.MED_NOMCOMMERCIAL as MED2
@@ -149,7 +149,7 @@ function getLesRapportsBrouillon($matricule)
 //,PRA_ADRESSE,PRA_CP, PRA_VILLE,PRA_COEFNOTORIETE,TYP_CODE
 
 
-function getAllInformationRapportDeVisiteNum($rapNum)
+function getInfosRapport($rapNum, $matricule)
 {
 
 
@@ -172,7 +172,7 @@ function getAllInformationRapportDeVisiteNum($rapNum)
   r.RAP_BILAN AS bilan,
   r.RAP_DATESAISIE AS datesaisie,
 
-  p.PRA_NUM AS numpraticien,
+  r.PRA_NUM AS numpraticien,
   p.PRA_NOM AS nompraticien,
   p.PRA_PRENOM AS prenompraticien,
 
@@ -195,11 +195,12 @@ LEFT JOIN motif m ON r.MO_CODE = m.MO_CODE
 LEFT JOIN praticien pr ON r.PRA_NUM_REMPLACANT = pr.PRA_NUM
 LEFT JOIN medicament md1 ON r.MED_DEPOTLEGAL_PRESENTER1 = md1.MED_DEPOTLEGAL
 LEFT JOIN medicament md2 ON r.MED_DEPOTLEGAL_PRESENTER2 = md2.MED_DEPOTLEGAL
-WHERE r.RAP_NUM = :rapNum;";
+WHERE r.RAP_NUM = :rapNum AND r.COL_MATRICULE = :matricule;";
 
 
         $res = $monPdo->prepare($req);
         $res->bindParam(':rapNum', $rapNum, PDO::PARAM_INT);
+        $res->bindParam(':matricule', $matricule, PDO::PARAM_STR);
         $res->execute();
         $fetch = $res->fetch(PDO::FETCH_ASSOC);
         if ($fetch === false) {
@@ -347,7 +348,7 @@ function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAut
         return false;
     }
 }
-function updateRapport($rapNum, $numPraticien, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numRemplacant, $etat, $echantillonsOfferts, $dateVisite)
+function updateRapport($matricule, $rapNum, $numPraticien, $motif, $motifAutre, $bilan, $medoc1, $medoc2, $numRemplacant, $etat, $echantillonsOfferts, $dateVisite)
 {
     $monPdo = null;
     try {
@@ -355,17 +356,8 @@ function updateRapport($rapNum, $numPraticien, $motif, $motifAutre, $bilan, $med
         $monPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $monPdo->beginTransaction();
 
-        // 1. RÉCUPÉRER LE MATRICULE (OBLIGATOIRE POUR LA CLÉ COMPOSITE ET LA TABLE OFFRIR)
-        $reqMatricule = "SELECT COL_MATRICULE FROM rapport_visite WHERE RAP_NUM = :rap_num";
-        $stmtMatricule = $monPdo->prepare($reqMatricule);
-        $stmtMatricule->bindValue(':rap_num', $rapNum, PDO::PARAM_INT);
-        $stmtMatricule->execute();
-        $matriculeExact = $stmtMatricule->fetchColumn();
-
-        if (!$matriculeExact) {
-            throw new Exception("Matricule du rapport non trouvé. Mise à jour impossible.");
-        }
-
+        // 1. (ANC) RÉCUPÉRER MATRICULE : SUPPRIMÉ CAR PASSÉ EN PARAMÈTRE POUR SÉCURITÉ
+        // On utilise directement $matricule dans le WHERE pour garantir que c'est le rapport de l'utilisateur.
 
         // 2. UPDATE rapport_visite (Utilisation de la clé composite)
         $req = "UPDATE rapport_visite SET 
@@ -382,7 +374,7 @@ function updateRapport($rapNum, $numPraticien, $motif, $motifAutre, $bilan, $med
         $stmt = $monPdo->prepare($req);
 
         // BINDING
-        $stmt->bindValue(':col_matricule', $matriculeExact, PDO::PARAM_STR);
+        $stmt->bindValue(':col_matricule', $matricule, PDO::PARAM_STR);
         $stmt->bindValue(':rap_num', $rapNum, PDO::PARAM_INT);
         $stmt->bindValue(':pra_num', $numPraticien, PDO::PARAM_INT);
         $stmt->bindValue(':rap_datevisite', $dateVisite, PDO::PARAM_STR);
@@ -412,7 +404,7 @@ function updateRapport($rapNum, $numPraticien, $motif, $motifAutre, $bilan, $med
         $stmt->execute();
 
         // 3. MISE À JOUR DES ÉCHANTILLONS (OFFRIR)
-        updateEchantillonsOfferts($monPdo, $matriculeExact, $rapNum, $echantillonsOfferts);
+        updateEchantillonsOfferts($monPdo, $matricule, $rapNum, $echantillonsOfferts);
 
         $monPdo->commit();
 
@@ -519,7 +511,7 @@ function getNouveauxRapports($region = null, $secteur = null)
 {
     try {
         $monPdo = connexionPDO();
-        $req = "SELECT r.RAP_NUM, r.RAP_DATEVISITE, c.COL_NOM, c.COL_PRENOM, 
+        $req = "SELECT r.RAP_NUM, r.RAP_DATEVISITE, r.COL_MATRICULE, c.COL_NOM, c.COL_PRENOM, 
                        p.PRA_NUM, p.PRA_NOM, p.PRA_PRENOM, 
                        m.MO_LIBELLE, r.RAP_MOTIF_AUTRE,
                        md1.MED_NOMCOMMERCIAL as MED1, md2.MED_NOMCOMMERCIAL as MED2

@@ -64,7 +64,7 @@
                                         ?>
                                     </td>
                                     <td>
-                                        <a href="index.php?uc=rapportvisite&action=afficherrapport&rapports=<?php echo $rapport['RAP_NUM']; ?>"
+                                        <a href="index.php?uc=rapportvisite&action=afficherrapport&rapports=<?php echo $rapport['RAP_NUM']; ?>&matricule=<?php echo $rapport['COL_MATRICULE']; ?>"
                                             class="btn btn-sm btn-info text-white">Voir</a>
                                     </td>
                                 </tr>

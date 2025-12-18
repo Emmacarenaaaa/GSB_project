@@ -198,4 +198,23 @@ function updateCoefConfiance($praNum, $coef)
         return false;
     }
 }
+
+function getPraticienById($id)
+{
+    try {
+        $monPdo = connexionPDO();
+        $req = 'SELECT p.PRA_NUM, p.PRA_NOM, p.PRA_PRENOM, p.PRA_COEFCONFIANCE, r.REG_NOM
+                FROM praticien p
+                LEFT JOIN departement d ON LEFT(p.PRA_CP, 2) = d.NoDEPT
+                LEFT JOIN region r ON d.REG_CODE = r.REG_CODE
+                WHERE p.PRA_NUM = :id';
+        $stmt = $monPdo->prepare($req);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Erreur getPraticienById : " . $e->getMessage());
+        return false;
+    }
+}
 ?>

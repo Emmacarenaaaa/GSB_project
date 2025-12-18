@@ -71,9 +71,12 @@ switch ($action) {
         $habId = $_SESSION['hab_id']; // Niveau d'habilitation
         $secCode = isset($_SESSION['sec_code']) ? $_SESSION['sec_code'] : null;
 
-        // Restriction pour les Visiteurs (niveau 1) : ils ne voient que leurs propres rapports
-        if ($habId == 1) {
+        // Restriction pour les Visiteurs  et délégué regional : ils ne voient que les rapports de leur région
+        if ($habId == 1 || $habId == 2) {
             $visiteurFiltre = $_SESSION['matricule'];
+            $regionCode = $getAllInformationCompte['reg_code'];
+
+
         }
 
         // Restriction pour les Responsables de Secteur (niveau 3) : filtrage par secteur
@@ -130,8 +133,13 @@ switch ($action) {
     case 'afficherrapport': {
         if (isset($_REQUEST['rapports'])) {
             $rapNum = $_REQUEST['rapports'];
-            // Récupère toutes les infos du rapport par son numéro
-            $carac = getAllInformationRapportDeVisiteNum($rapNum);
+
+            // On tente de récupérer le matricule dans l'URL (contexte historique/liste)
+            // Sinon on prend celui de la session (contexte "mes rapports")
+            $matriculeVisite = isset($_REQUEST['matricule']) ? $_REQUEST['matricule'] : $_SESSION['matricule'];
+
+            // Récupère toutes les infos du rapport par son numéro ET le matricule
+            $carac = getInfosRapport($rapNum, $matriculeVisite);
 
             if ($carac === false) {
                 $_SESSION['erreur'] = "Rapport introuvable.";
@@ -211,6 +219,7 @@ switch ($action) {
             // --- 1. Récupération et Assainissement des données POST ---
 
             // Données principales (conversion numérique)
+            $matricule = $_SESSION['matricule'];
             $numPraticien = (int) ($_POST['praticien'] ?? 0);
             $motif = (int) ($_POST['motif'] ?? 0);
             $etat = (int) ($_POST['etat'] ?? 0); // État par défaut 0 (Nouveau) si non fourni
@@ -243,30 +252,27 @@ switch ($action) {
                 $quantite = (int) ($_POST[$qte_key] ?? 0);
 
                 if (empty($medoc_id_raw)) {
-                    if ($i > 1 && count($echantillonsOfferts) > 0) {
-                        break;
-                    }
-                    continue;
+                    continue; // Skip empty rows
                 }
 
-                // Assainissement final
                 $medoc_id_safe = htmlspecialchars($medoc_id_raw, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-                // Validation : La quantité doit être > 0 si le produit est sélectionné
-                // MODIFICATION : Autoriser NULL (voir modification plus bas)
-                /*
-                if ($quantite <= 0) {
-                    $_SESSION['erreur'] = 'Veuillez spécifier une quantité positive pour l\'échantillon ' . $i . '.';
-                    header('Location: index.php?uc=rapportvisite&action=saisirrapport');
-                    exit;
+                // Check duplicates
+                $isDuplicate = false;
+                foreach ($echantillonsOfferts as $eo) {
+                    if ($eo['medoc_id'] === $medoc_id_safe) {
+                        $isDuplicate = true;
+                        break;
+                    }
                 }
-                */
+                if ($isDuplicate)
+                    continue;
 
                 $quantiteFinale = ($quantite > 0) ? $quantite : null;
 
                 $echantillonsOfferts[] = [
-                    'medoc_id' => $medoc_id_safe,
-                    'quantite' => $quantiteFinale
+                    'medoc_id' => $medoc_id_safe, // MED_DEPOTLEGAL
+                    'quantite' => $quantiteFinale // Can be NULL
                 ];
             }
 
@@ -359,7 +365,7 @@ switch ($action) {
         $rapNum = $_REQUEST['rapports'];
         $matricule = $_SESSION['matricule'];
         // Récupération des données du rapport
-        $carac = getAllInformationRapportDeVisiteNum($rapNum);
+        $carac = getInfosRapport($rapNum, $matricule);
 
         if ($carac === false) {
             $_SESSION['erreur'] = "Rapport introuvable.";
@@ -368,11 +374,20 @@ switch ($action) {
         }
         // Vérification de l'état (ET_CODE)
         // Vérifier si le rapport est bien en état "Nouveau" (1) pour autoriser la modif
+        // Modification user : status 0 is draft. 
         if ($carac[19] != 0) {
             $_SESSION['erreur'] = "Ce rapport n'est pas modifiable.";
             header("Location: index.php?uc=rapportvisite&action=voirrapport");
             exit;
         }
+
+        // Vérification des droits : Seul le créateur peut modifier son brouillon
+        if ($carac[0] != $matricule) {
+            $_SESSION['erreur'] = "Vous n'avez pas les droits pour modifier ce rapport.";
+            header("Location: index.php?uc=rapportvisite&action=mesRapportsBrouillon");
+            exit;
+        }
+
         $echantillonsInitiaux = getEchantillonsOffertsByRapportNum($matricule, $rapNum);
         // Récupération des données du rapport  (retourne les données)
         $motifs = getMotifs();
@@ -381,6 +396,25 @@ switch ($action) {
         $infosUtilisateur = getAllInformationCompte($_SESSION['matricule']);
         $regionCode = $infosUtilisateur['reg_code'];
         $praticiens = getPraticiensByRegion($regionCode);
+
+        // Ensure the report's practitioner is in the list
+        $praNum = $carac[8];
+        $found = false;
+        foreach ($praticiens as $p) {
+            if ($p['PRA_NUM'] == $praNum) {
+                $found = true;
+                break;
+            }
+        }
+        if (!$found) {
+            $specificPrat = getPraticienById($praNum);
+            if ($specificPrat) {
+                $praticiens[] = $specificPrat;
+                // Re-sort by name
+                $nom = array_column($praticiens, 'PRA_NOM');
+                array_multisort($nom, SORT_ASC, $praticiens);
+            }
+        }
 
         // Le code du visiteur est déjà en session
         $mode = 'modification'; // Indicateur pour la vue
@@ -399,6 +433,8 @@ switch ($action) {
                 header("Location: index.php?uc=rapportvisite&action=voirrapport");
                 exit;
             }
+
+            $matricule = $_SESSION['matricule'];
 
             $numPraticien = (int) ($_POST['praticien'] ?? 0);
             $motif = (int) ($_POST['motif'] ?? 0);
@@ -446,43 +482,32 @@ switch ($action) {
                 $medoc_key = "echantillon_medoc_{$i}";
                 $qte_key = "echantillon_qte_{$i}";
 
-                // Récupérer les valeurs (null si non envoyées)
                 $medoc_id_raw = $_POST[$medoc_key] ?? null;
                 $quantite = (int) ($_POST[$qte_key] ?? 0);
 
-                // Si le médicament est vide, on s'arrête (car les champs sont séquentiels)
                 if (empty($medoc_id_raw)) {
-                    // On s'arrête seulement si on a déjà traité au moins une ligne valide
-                    if ($i > 1 && count($echantillonsOfferts) > 0) {
-                        break;
-                    }
-                    // Si c'est la première ligne et qu'elle est vide, on continue pour voir si la 2ème est remplie (au cas où)
-                    continue;
+                    continue; // Skip empty rows, do not break
                 }
 
-                // Validation : La quantité doit être > 0 si le produit est sélectionné
-                // MODIFICATION : On autorise 0 ou NULL avec avertissement JS côté client,
-                // donc côté serveur on stocke 0 ou NULL si c'est le cas.
-                /*
-                if ($quantite <= 0) {
-                    $_SESSION['erreur'] = 'Veuillez spécifier une quantité positive pour l\'échantillon ' . $i . ' (' . $medoc_id_raw . ').';
-                    header("Location: index.php?uc=rapportvisite&action=editerrapport&rapports=$rapNum");
-                    exit;
-                }
-                */
-
-                // Assainissement final et stockage
                 $medoc_id_safe = htmlspecialchars($medoc_id_raw, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-                // Si quantité <= 0 ou vide, on la considère comme NULL ou 0 selon besoin.
-                // La demande est "vérifie qu'on puisse avoir une valeur null".
+                // Check for duplicates
+                $isDuplicate = false;
+                foreach ($echantillonsOfferts as $eo) {
+                    if ($eo['medoc_id'] === $medoc_id_safe) {
+                        $isDuplicate = true;
+                        break;
+                    }
+                }
+                if ($isDuplicate)
+                    continue;
+
+                // Validation : Quantity can be null (user requirement)
                 $quantiteFinale = ($quantite > 0) ? $quantite : null;
 
                 $echantillonsOfferts[] = [
-                    // La valeur 'medoc_id' est garantie non-vide ici,
-                    // car les entrées vides sont ignorées ou causent une sortie anticipée.
-                    'medoc_id' => $medoc_id_safe,
-                    'quantite' => $quantiteFinale
+                    'medoc_id' => $medoc_id_safe, // MED_DEPOTLEGAL
+                    'quantite' => $quantiteFinale // Can be NULL
                 ];
             }
 
@@ -492,6 +517,7 @@ switch ($action) {
 
             // Assurez-vous que votre fonction updateRapport a bien 10 arguments !
             $resultat = updateRapport(
+                $matricule,
                 $rapNum,
                 $numPraticien,
                 $motif,

@@ -68,7 +68,8 @@
                             <h5 class="mb-3" style="color: #123ea6;">Bilan</h5>
                             <div class="p-3 bg-light rounded border-start border-4"
                                 style="border-color: #123ea6 !important;">
-                                <p class="mb-0 fst-italic">"<?php echo nl2br(htmlspecialchars($carac[6])); ?>"</p>
+                                <p class="mb-0 fst-italic">"<?php echo nl2br(htmlspecialchars_decode($carac[6])); ?>"
+                                </p>
                             </div>
                         </div>
 
