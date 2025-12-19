@@ -1,10 +1,9 @@
 <section class="bg-light">
     <div class="container">
         <div class="structure-hero pt-lg-5 pt-4">
-            <h1 class="titre text-center">Formulaire de praticiens</h1>
+            <h1 class="titre text-center">Consulter les praticiens</h1>
             <p class="text text-center">
-                Formulaire permettant d'afficher toutes les informations
-                à propos d'un praticien en particulier.
+                Veuillez choisir un praticien dans la liste ci-dessous.
             </p>
         </div>
         <div class="row align-items-center justify-content-center">

@@ -9,7 +9,6 @@
         </div>
 
         <div class="row align-items-center justify-content-center mt-5">
-            <!-- Single success message shown after Valider -->
             <?php if ($mode === 'succes' && !empty($message)): ?>
                 <div class="col-12">
                     <div class="alert alert-success text-center" role="alert">
@@ -17,16 +16,6 @@
                     </div>
                 </div>
             <?php endif; ?>
-
-            <!-- Bouton de retour vers le formulaire principal des praticiens -->
-            <div class="col-12 text-center mb-3">
-                <form method="get" action="index.php" style="display:inline-block;">
-                    <input type="hidden" name="uc" value="praticien">
-                    <input type="hidden" name="action" value="formulaireprat">
-                    <button type="submit" class="btn btn-outline-primary">Retour sur le formulaire de
-                        praticiens</button>
-                </form>
-            </div>
 
             <!-- Affichage des erreurs -->
             <?php if (!empty($errors)): ?>
@@ -40,6 +29,8 @@
             <?php endif; ?>
 
             <!-- ===== MODE LISTE ===== -->
+
+
             <?php if ($mode == 'liste'): ?>
                 <div class="col-12 col-lg-8">
                     <div class="card shadow">
@@ -60,17 +51,20 @@
                                     </select>
                                 </div>
                                 <div class="d-flex gap-2">
-                                    <button type="submit" class="btn btn-warning text-light">Modifier</button>
+                                    <button type="submit" class="btn btn-primary text-light">Modifier</button>
                                 </div>
                             </form>
 
                             <form method="post" class="mt-3">
                                 <input type="hidden" name="form_action" value="creer">
-                                <button type="submit" class="btn btn-success">Créer un nouveau praticien</button>
+                                <button type="submit" class="btn btn-secondary text-light">Créer un nouveau
+                                    praticien</button>
                             </form>
                         </div>
+
                     </div>
                 </div>
+
             <?php endif; ?>
 
             <!-- ===== MODE EDITER ===== -->
@@ -176,7 +170,6 @@
                 </div>
             <?php endif; ?>
 
-            <!-- MODE 'succes' UI removed; single alert above handles success display -->
         </div>
     </div>
 </section>
