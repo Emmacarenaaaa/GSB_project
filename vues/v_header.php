@@ -30,11 +30,37 @@
                         <li class="nav-item ">
                             <a class="nav-link btn-outline-info rounded-pill px-3 fw-bold" href="index.php?uc=medicaments&action=formulairemedoc">Médicaments</a>
                         </li>
-                        <li class="nav-item ">
-                            <a class="nav-link btn-outline-info rounded-pill px-3 fw-bold" href="index.php?uc=praticien&action=formulaireprat">Praticiens</a>
+                        
+                        <!-- Menu Praticiens -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle btn-outline-info rounded-pill px-3 fw-bold" href="#" id="praticienDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Praticiens
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="praticienDropdown">
+                                <li><a class="dropdown-item" href="index.php?uc=praticien&action=formulaireprat">Consulter</a></li>
+                                <?php if (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] != 1) : ?>
+                                    <li><a class="dropdown-item" href="index.php?uc=praticien&action=modif">Gérer</a></li>
+                                <?php endif; ?>
+                            </ul>
                         </li>
-                       <li class="nav-item ">
-                            <a class="nav-link btn-outline-info rounded-pill px-3 fw-bold" href="index.php?uc=rapportvisite&action=voirrapport">Rapport de Visite</a>
+
+                        <!-- Menu Rapports -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle btn-outline-info rounded-pill px-3 fw-bold" href="#" id="rapportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Rapports
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="rapportDropdown">
+                                <li><a class="dropdown-item" href="index.php?uc=rapportvisite&action=voirrapport">Consulter</a></li>
+                                
+                                <?php if (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] != 3) : ?>
+                                    <li><a class="dropdown-item" href="index.php?uc=rapportvisite&action=saisirrapport">Nouveau Rapport</a></li>
+                                    <li><a class="dropdown-item" href="index.php?uc=rapportvisite&action=mesRapportsBrouillon">Mes Brouillons</a></li>
+                                <?php endif; ?>
+
+                                <?php if (isset($_SESSION['hab_id']) && ($_SESSION['hab_id'] == 2 || $_SESSION['hab_id'] == 3)) : ?>
+                                    <li><a class="dropdown-item" href="index.php?uc=rapportvisite&action=nouveauxRapportsRegion">À Valider</a></li>
+                                <?php endif; ?>
+                            </ul>
                         </li>
                         
                         <li class="nav-item ">

@@ -28,11 +28,6 @@
                         ?>
                     </select>
                     <input class="btn btn-info text-light valider" type="submit" value="Afficher les informations">
-                    <?php if (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] != 1): ?>
-                        <a href="index.php?uc=praticien&action=modif" class="btn btn-warning" style="margin-left:15px;">
-                            Gérer praticiens
-                        </a>
-                    <?php endif; ?>
                 </form>
 
             </div>

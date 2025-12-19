@@ -72,16 +72,7 @@
 
             </form>
 
-            <!-- Boutons pour créer un nouveau rapport ou voir les brouillons (dispo ici aussi pour accès rapide) -->
-            <?php if (isset($_SESSION['hab_id']) && $_SESSION['hab_id'] != 3): ?>
-                <div class="mt-4">
-                    <input class="btn btn-info text-light valider w-100" type="button" value="Remplir un nouveau rapport"
-                        onclick="window.location.href='index.php?uc=rapportvisite&action=saisirrapport'">
-                    <input class="btn btn-warning text-light valider mt-2 w-100" type="button"
-                        value="Mes rapports brouillon"
-                        onclick="window.location.href='index.php?uc=rapportvisite&action=mesRapportsBrouillon'">
-                </div>
-            <?php endif; ?>
+
 
         </div>
     </div>
