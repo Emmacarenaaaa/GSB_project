@@ -71,12 +71,9 @@ switch ($action) {
         $habId = $_SESSION['hab_id']; // Niveau d'habilitation
         $secCode = isset($_SESSION['sec_code']) ? $_SESSION['sec_code'] : null;
 
-        // Restriction pour les Visiteurs  et délégué regional : ils ne voient que les rapports de leur région
-        if ($habId == 1 || $habId == 2) {
+        // Restriction pour les Visiteurs (hab_id = 1) : ils ne voient que leurs propres rapports
+        if ($habId == 1) {
             $visiteurFiltre = $_SESSION['matricule'];
-            $regionCode = $getAllInformationCompte['reg_code'];
-
-
         }
 
         // Restriction pour les Responsables de Secteur (niveau 3) : filtrage par secteur
@@ -123,6 +120,14 @@ switch ($action) {
         // Récupère les rapports non validés/terminés
         $lesRapportsBrouillon = getLesRapportsBrouillon($matricule);
         include("vues/v_rapportsBrouillon.php");
+        break;
+    }
+
+    case 'mesRapportsClos': {
+        $matricule = $_SESSION['matricule'];
+        // Récupère les rapports clos (validés et consultés)
+        $result = getMesRapportsClos($matricule);
+        include("vues/v_listeMesRapportsClos.php");
         break;
     }
 

@@ -18,7 +18,7 @@
         <?php if (isset($autoDetectedDrafts) && $autoDetectedDrafts): ?>
           <div class="alert alert-info text-center">
             <strong>Vous avez des rapports en cours de saisie (brouillons).</strong><br>
-            Vous pouvez terminer un rapport existant ou en créer un nouveau.
+            Vous pouvez effectuer la saisie définitive d'un rapport existant ou en créer un nouveau.
           </div>
         <?php endif; ?>
 
