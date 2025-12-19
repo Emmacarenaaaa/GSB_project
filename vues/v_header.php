@@ -28,8 +28,11 @@
                 <div class="flex-fill d-flex justify-content-end">
                     <ul class="nav navbar-nav d-flex justify-content-between mx-xl-5 text-center text-dark">
                         <li class="nav-item ">
-                            <a class="nav-link btn-outline-info rounded-pill px-3 fw-bold"
-                                href="index.php?uc=accueil">Accueil</a>
+                            <a class="nav-link btn-outline-info rounded-pill px-3 fw-bold d-flex align-items-center"
+                                href="index.php?uc=accueil">
+                                <img src="assets/img/accueil.png" alt=""
+                                    style="width: 20px; height: 20px; margin-right: 8px;"> Accueil
+                            </a>
                         </li>
                         <li class="nav-item ">
                             <a class="nav-link btn-outline-info rounded-pill px-3 fw-bold"
@@ -82,13 +85,19 @@
                         </li>
 
                         <li class="nav-item ">
-                            <a class="nav-link btn-outline-info rounded-pill px-3 fw-bold"
-                                href="index.php?uc=connexion&action=profil">Profil</a>
+                            <a class="nav-link btn-outline-info rounded-pill px-3 fw-bold d-flex align-items-center"
+                                href="index.php?uc=connexion&action=profil">
+                                <img src="assets/img/profil.png" alt=""
+                                    style="width: 20px; height: 20px; margin-right: 8px;"> Profil
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn-outline-info rounded-pill px-3 fw-bold"
+                            <a class="nav-link btn-outline-info rounded-pill px-3 fw-bold d-flex align-items-center"
                                 href="index.php?uc=connexion&action=deconnexion"
-                                onclick="return confirm('Voulez-vous vraiment vous déconnecter ?');">Déconnexion</a>
+                                onclick="return confirm('Voulez-vous vraiment vous déconnecter ?');">
+                                <img src="assets/img/deco.png" alt=""
+                                    style="width: 20px; height: 20px; margin-right: 8px;"> Déconnexion
+                            </a>
                         </li>
                     </ul>
                 </div>
