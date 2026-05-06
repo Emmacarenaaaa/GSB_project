@@ -109,10 +109,11 @@ function getCollaborateursBySecteur($secteur)
 {
     try {
         $monPdo = connexionPDO();
-        $req = "SELECT COL_MATRICULE, COL_NOM, COL_PRENOM 
-                FROM collaborateur 
-                WHERE SEC_CODE = :secteur 
-                ORDER BY COL_NOM, COL_PRENOM";
+        $req = "SELECT c.COL_MATRICULE, c.COL_NOM, c.COL_PRENOM 
+                FROM collaborateur c
+                LEFT JOIN region r ON c.REG_CODE = r.REG_CODE
+                WHERE r.SEC_CODE = :secteur
+                ORDER BY c.COL_NOM, c.COL_PRENOM";
 
         $stmt = $monPdo->prepare($req);
         $stmt->bindValue(':secteur', $secteur, PDO::PARAM_STR);
