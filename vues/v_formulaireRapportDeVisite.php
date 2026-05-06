@@ -7,7 +7,6 @@ $actionForm = $isModification ? "index.php?uc=rapportvisite&action=sauvegarderMo
 // Valeurs par défaut (ou récupérées si modification)
 $praNumVal = $isModification ? $carac[8] : (isset($_POST['praticien']) ? $_POST['praticien'] : '');
 $dateVisiteVal = $isModification ? $carac[4] : (isset($_POST['dateVisite']) ? $_POST['dateVisite'] : '');
-// Pour le motif, en modification on a le LIBELLE dans $carac[5], pas le code. On essaiera de mapper ou on utilisera le code si dispo
 $motifCodeVal = $isModification ? '' : (isset($_POST['motif']) ? $_POST['motif'] : '');
 $motifAutreVal = $isModification ? ($carac[5] != 'Autre' && !in_array($carac[5], array_column($motifs, 'MO_LIBELLE')) ? $carac[5] : '') : '';
 $bilanVal = $isModification ? $carac[6] : (isset($_POST['bilan']) ? $_POST['bilan'] : '');

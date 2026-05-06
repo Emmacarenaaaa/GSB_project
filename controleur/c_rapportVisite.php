@@ -159,7 +159,7 @@ switch ($action) {
                 $carac[13] = ''; // prénom remplacant
             }
 
-            // NOUVEAU : Si Délégué (2) ou Responsable (3) consulte un rapport Validé (1), on le passe en Consulté (2)
+            //Si Délégué (2) ou Responsable (3) consulte un rapport Validé (1), on le passe en Consulté (2)
             // carac[19] est ET_CODE (voir getAllInformationRapportDeVisiteNum)
             if (isset($_SESSION['hab_id']) && ($_SESSION['hab_id'] == 2 || $_SESSION['hab_id'] == 3) && $carac[19] == 1) {
                 setRapportConsulte($rapNum);
@@ -167,6 +167,9 @@ switch ($action) {
                 $carac[19] = 2;
                 $carac[18] = 'Consulté'; // On suppose que le libellé 2 est 'Consulté'
             }
+
+            // Récupération des échantillons offerts
+            $echantillons = getEchantillonsOffertsByRapportNum($matriculeVisite, $rapNum);
 
             include("vues/v_afficherRapportDeVisite.php");
         } else {

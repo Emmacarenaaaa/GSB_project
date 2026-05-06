@@ -102,7 +102,7 @@
                                     <table class="table table-sm table-bordered">
                                         <thead class="table-light">
                                             <tr>
-                                                <th>Médicament (Code)</th>
+                                                <th>Médicament</th>
                                                 <th class="text-center" style="width: 100px;">Quantité</th>
                                             </tr>
                                         </thead>
