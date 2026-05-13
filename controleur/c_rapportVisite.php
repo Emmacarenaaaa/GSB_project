@@ -247,8 +247,7 @@ switch ($action) {
 
             $matricule = $_SESSION['matricule'];
 
-            // --- 2. RÉCUPÉRATION ET VALIDATION DES ÉCHANTILLONS ---
-
+            // Récupération et validation des échantillons
             $echantillonsOfferts = [];
             $maxEchantillons = 10;
 
@@ -260,12 +259,12 @@ switch ($action) {
                 $quantite = (int) ($_POST[$qte_key] ?? 0);
 
                 if (empty($medoc_id_raw)) {
-                    continue; // Skip empty rows
+                    continue; // Ignorer les lignes vides
                 }
 
                 $medoc_id_safe = htmlspecialchars($medoc_id_raw, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-                // Check duplicates
+                // Vérification des doublons
                 $isDuplicate = false;
                 foreach ($echantillonsOfferts as $eo) {
                     if ($eo['medoc_id'] === $medoc_id_safe) {
@@ -279,12 +278,12 @@ switch ($action) {
                 $quantiteFinale = ($quantite > 0) ? $quantite : null;
 
                 $echantillonsOfferts[] = [
-                    'medoc_id' => $medoc_id_safe, // MED_DEPOTLEGAL
-                    'quantite' => $quantiteFinale // Can be NULL
+                    'medoc_id' => $medoc_id_safe, 
+                    'quantite' => $quantiteFinale 
                 ];
             }
 
-            // --- 3. Validation des Données Principales ---
+            // Validation des données principales
 
             // Validation de l'ID Praticien
             if ($numPraticien <= 0) {

@@ -266,7 +266,7 @@ function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAut
         $monPdo = connexionPDO();
         $monPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        $monPdo->beginTransaction(); // 1. DÉMARRER LA TRANSACTION
+        $monPdo->beginTransaction();
 
         $getMatricule = $monPdo->prepare("SELECT COL_MATRICULE FROM collaborateur WHERE COL_MATRICULE = ?");
         $getMatricule->execute([$matricule]);
@@ -276,6 +276,7 @@ function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAut
             throw new Exception("Matricule inexistant");
         }
 
+        // Récupération du prochain numéro de rapport pour ce collaborateur
         $reqNum = "SELECT IFNULL(MAX(RAP_NUM), 0) + 1 AS prochain_num 
                    FROM rapport_visite 
                    WHERE COL_MATRICULE = ?";
@@ -285,8 +286,7 @@ function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAut
         if (!$rapNum)
             $rapNum = 1;
 
-
-        // 2. INSERTION DU RAPPORT DANS RAPPORT_VISITE
+        // Insertion du nouveau rapport
         $req = "INSERT INTO rapport_visite (
             COL_MATRICULE, RAP_NUM, PRA_NUM, RAP_DATEVISITE, MO_Code, RAP_MOTIF_AUTRE,
             RAP_BILAN, RAP_DATESAISIE,
@@ -299,7 +299,6 @@ function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAut
 
         $stmt = $monPdo->prepare($req);
 
-        // BIND (Gestion des NULLs omise ici pour la concision, mais doit être complète dans votre code)
         $stmt->bindValue(':col_matricule', $matriculeExact, PDO::PARAM_STR);
         $stmt->bindValue(':rap_num', $rapNum, PDO::PARAM_INT);
         $stmt->bindValue(':pra_num', $numPraticien, PDO::PARAM_INT);
@@ -330,10 +329,10 @@ function insertRapport($matricule, $numPraticien, $dateVisite, $motif, $motifAut
 
         $stmt->execute();
 
-        // 3. INSERTION DES ÉCHANTILLONS DANS OFFRIR (CLE ÉTRANGÈRE RESPECTÉE)
+        // Ajout des échantillons offerts
         insertEchantillonsOfferts($monPdo, $matriculeExact, $rapNum, $echantillonsOfferts);
 
-        $monPdo->commit(); // 4. VALIDATION FINALE
+        $monPdo->commit();
 
         error_log("Rapport inséré avec succès !");
         return true;
@@ -358,10 +357,7 @@ function updateRapport($matricule, $rapNum, $numPraticien, $motif, $motifAutre, 
         $monPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $monPdo->beginTransaction();
 
-        // 1. (ANC) RÉCUPÉRER MATRICULE : SUPPRIMÉ CAR PASSÉ EN PARAMÈTRE POUR SÉCURITÉ
-        // On utilise directement $matricule dans le WHERE pour garantir que c'est le rapport de l'utilisateur.
-
-        // 2. UPDATE rapport_visite (Utilisation de la clé composite)
+        // Mise à jour du rapport de visite (avec vérification du matricule pour la sécurité)
         $req = "UPDATE rapport_visite SET 
                 PRA_NUM = :pra_num, MO_CODE = :mo_code, 
                 RAP_MOTIF_AUTRE = :rap_motif_autre,
@@ -371,11 +367,10 @@ function updateRapport($matricule, $rapNum, $numPraticien, $motif, $motifAutre, 
                 PRA_NUM_REMPLACANT = :numRemplacant,
                 RAP_DATEVISITE = :rap_datevisite,
                 ET_CODE = :et_code
-                WHERE RAP_NUM = :rap_num AND COL_MATRICULE = :col_matricule"; // CLÉ COMPOSITE
+                WHERE RAP_NUM = :rap_num AND COL_MATRICULE = :col_matricule"; 
 
         $stmt = $monPdo->prepare($req);
 
-        // BINDING
         $stmt->bindValue(':col_matricule', $matricule, PDO::PARAM_STR);
         $stmt->bindValue(':rap_num', $rapNum, PDO::PARAM_INT);
         $stmt->bindValue(':pra_num', $numPraticien, PDO::PARAM_INT);
@@ -405,7 +400,7 @@ function updateRapport($matricule, $rapNum, $numPraticien, $motif, $motifAutre, 
         $stmt->bindValue(':et_code', $etat, PDO::PARAM_INT);
         $stmt->execute();
 
-        // 3. MISE À JOUR DES ÉCHANTILLONS (OFFRIR)
+        // Mise à jour des échantillons offerts liés au rapport
         updateEchantillonsOfferts($monPdo, $matricule, $rapNum, $echantillonsOfferts);
 
         $monPdo->commit();

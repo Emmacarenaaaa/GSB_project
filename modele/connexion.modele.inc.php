@@ -137,6 +137,11 @@ function getColMatricule()
     }
 }
 
+/**
+ * Récupère le nombre total de matricules enregistrés
+ *
+ * @return array Résultat contenant le nombre ('nb')
+ */
 function getCountMatricule()
 {
 
