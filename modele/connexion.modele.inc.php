@@ -19,11 +19,11 @@ function getAllInformationCompte($matricule)
                        r.REG_NOM as `region`,
                        c.HAB_ID as `hab_id`,
                        c.REG_CODE as `reg_code`,
-                       c.SEC_CODE as `sec_code`
+                       r.SEC_CODE as `sec_code`
                 FROM collaborateur c 
-                LEFT JOIN secteur s ON s.`SEC_CODE`=c.`SEC_CODE` 
                 LEFT JOIN habilitation h ON h.HAB_ID=c.HAB_ID 
                 LEFT JOIN region r ON r.REG_CODE=c.REG_CODE 
+                LEFT JOIN secteur s ON s.`SEC_CODE`=r.`SEC_CODE` 
                 WHERE c.COL_MATRICULE="' . $matricule . '"';
         $res = $monPdo->query($req);
         $result = $res->fetch();
